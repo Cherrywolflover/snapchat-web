@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CherryChat :D</title>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Heavy AI Face Tracking Packages -->
     <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
     <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
 </head>
@@ -33,21 +31,17 @@
             </div>
         </div>
 
-        <!-- CAMERA INTERFACE SCREEN CONTAINER -->
+        <!-- CAMERA VIEWPORT -->
         <div class="camera-area" id="camera-click-zone">
-            <!-- Invisible stream window feeding frames to the AI graph model -->
             <video id="viewfinder" autoplay playsinline style="display:none;"></video>
-            
-            <!-- Real live output layout canvas where assets bakes over your face -->
             <canvas id="overlayCanvas"></canvas>
             <canvas id="photoCanvas" style="display:none;"></canvas>
 
-            <!-- Hideable Text Entry Box -->
             <div class="text-overlay-container" id="text-container" style="display: none;">
                 <input type="text" id="snap-text" placeholder="Type something..." maxlength="45">
             </div>
 
-            <!-- FILTERS SELECTION BUTTON PANEL -->
+            <!-- FILTER PANEL -->
             <div class="filter-selector">
                 <button onclick="applyCherryFilter('none', event)" class="active" id="btn-none">None</button>
                 <button onclick="applyCherryFilter('unicorn', event)" id="btn-unicorn">🦄 Horn</button>
