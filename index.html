@@ -10,57 +10,45 @@
 
     <div class="app-container">
         
-        <!-- SIDEBAR DRAWER -->
+        <!-- SIDEBAR DRAWER PANEL -->
         <div class="sidebar">
             <div class="sidebar-header">
                 <h2>🍒 CherryChat</h2>
-                <div class="profile-badge">👤 cheryl0</div>
+                <div class="profile-badge" id="user-display-tag">👤 cheryl0</div>
             </div>
             
-            <div class="chat-section">
+            <!-- Dynamic Messaging Panel Area -->
+            <div class="chat-section" id="active-chat-tray">
                 <h3>💬 Chats</h3>
                 <div class="chat-item active-chat">
                     <span class="chat-icon">🤖</span>
                     <div class="chat-info">
                         <h4>Coding Assistant</h4>
-                        <p>Let's build this app!</p>
-                    </div>
-                </div>
-                <div class="chat-item">
-                    <span class="chat-icon">🦄</span>
-                    <div class="chat-info">
-                        <h4>Bestie</h4>
-                        <p>Sent a snap • 2m ago</p>
-                    </div>
-                </div>
-                <div class="chat-item">
-                    <span class="chat-icon">🐱</span>
-                    <div class="chat-info">
-                        <h4>Cat Lover</h4>
-                        <p>Opened • 1h ago</p>
+                        <p>Let's activate real chats next!</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- CAMERA DISPLAY WINDOW -->
-        <div class="camera-area">
+        <!-- RE-ENGINEERED CAMERA INTERFACE -->
+        <div class="camera-area" id="camera-click-zone">
             <video id="viewfinder" autoplay playsinline></video>
             <canvas id="photoCanvas" style="display:none;"></canvas>
-            <div id="filter-graphic-overlay"></div>
+            
+            <!-- Graphic canvas overlay layer replacing text blocks -->
+            <canvas id="overlayCanvas"></canvas>
 
-            <div class="text-overlay-container" id="text-container">
-                <input type="text" id="snap-text" placeholder="Tap to type..." maxlength="50">
+            <!-- Dynamic Hidden Context Input Field -->
+            <div class="text-overlay-container" id="text-container" style="display: none;">
+                <input type="text" id="snap-text" placeholder="Type something..." maxlength="45">
             </div>
 
-            <!-- FILTERS SELECTION SLIDER -->
+            <!-- FILTER ROTATION PANEL -->
             <div class="filter-selector">
-                <button onclick="applySnapFilter('none')" class="active">None</button>
-                <button onclick="applySnapFilter('unicorn')">🦄 Unicorn</button>
-                <button onclick="applySnapFilter('halo')">😇 Angel</button>
-                <button onclick="applySnapFilter('glasses')">😎 Sunglasses</button>
-                <button onclick="applySnapFilter('dog')">🐶 Dog</button>
-                <button onclick="applySnapFilter('cat')">🐱 Cat</button>
+                <button onclick="applyCherryFilter('none')" class="active" id="btn-none">None</button>
+                <button onclick="applyCherryFilter('unicorn')" id="btn-unicorn">🦄 Horn</button>
+                <button onclick="applyCherryFilter('halo')" id="btn-halo">😇 Halo</button>
+                <button onclick="applyCherryFilter('glasses')" id="btn-glasses">😎 Glasses</button>
             </div>
 
             <div class="ui-container">
