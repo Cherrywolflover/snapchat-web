@@ -12,12 +12,14 @@ body, html {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* Base flex grid layout split */
 .app-container {
     display: flex;
     width: 100vw;
     height: 100vh;
 }
 
+/* SIDEBAR STYLING PANEL */
 .sidebar {
     width: 320px;
     height: 100%;
@@ -37,7 +39,7 @@ body, html {
 
 .sidebar-header h2 {
     font-size: 22px;
-    color: #ff3366;
+    color: #ff3366; /* Cherry Pink Theme Color */
     margin-bottom: 8px;
 }
 
@@ -53,6 +55,14 @@ body, html {
     padding: 15px;
 }
 
+.chat-section h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
 .chat-item {
     display: flex;
     align-items: center;
@@ -61,11 +71,22 @@ body, html {
     background: #232323;
 }
 
-.chat-icon { font-size: 24px; margin-right: 12px; }
-.chat-info h4 { font-size: 15px; margin-bottom: 2px; }
-.chat-info p { font-size: 12px; color: #aaaaaa; }
+.chat-icon {
+    font-size: 24px;
+    margin-right: 12px;
+}
 
-/* RE-ENHANCED AI DISPLAY HOUSING LAYER */
+.chat-info h4 {
+    font-size: 15px;
+    margin-bottom: 2px;
+}
+
+.chat-info p {
+    font-size: 12px;
+    color: #aaaaaa;
+}
+
+/* CAMERA SCREEN GRID COMPONENT */
 .camera-area {
     position: relative;
     flex-grow: 1;
@@ -73,6 +94,7 @@ body, html {
     background: #000;
 }
 
+/* Forces drawing overlays to stack identically over the camera feedback canvas view */
 #overlayCanvas {
     width: 100%;
     height: 100%;
@@ -82,6 +104,7 @@ body, html {
     z-index: 5;
 }
 
+/* Hideable custom text input strip element layout container */
 .text-overlay-container {
     position: absolute;
     top: 60%;
@@ -104,6 +127,7 @@ body, html {
     text-align: center;
 }
 
+/* Horizontal slider item row container panel */
 .filter-selector {
     position: absolute;
     bottom: 130px;
@@ -124,6 +148,7 @@ body, html {
     cursor: pointer;
     font-size: 13px;
     font-weight: bold;
+    outline: none;
 }
 
 .filter-selector button.active {
