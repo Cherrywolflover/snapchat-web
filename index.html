@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CherryChat :D</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
-    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -25,15 +23,15 @@
                     <span class="chat-icon">🤖</span>
                     <div class="chat-info">
                         <h4>Coding Assistant</h4>
-                        <p>AI Tracking Active!</p>
+                        <p>Let's add real friends next!</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- CAMERA VIEWPORT -->
+        <!-- CAMERA AREA -->
         <div class="camera-area" id="camera-click-zone">
-            <video id="viewfinder" autoplay playsinline style="display:none;"></video>
+            <video id="viewfinder" autoplay playsinline></video>
             <canvas id="overlayCanvas"></canvas>
             <canvas id="photoCanvas" style="display:none;"></canvas>
 
@@ -41,7 +39,7 @@
                 <input type="text" id="snap-text" placeholder="Type something..." maxlength="45">
             </div>
 
-            <!-- FILTER PANEL -->
+            <!-- FILTER ROW -->
             <div class="filter-selector">
                 <button onclick="applyCherryFilter('none', event)" class="active" id="btn-none">None</button>
                 <button onclick="applyCherryFilter('unicorn', event)" id="btn-unicorn">🦄 Horn</button>
