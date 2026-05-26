@@ -18,7 +18,7 @@ body, html {
     height: 100vh;
 }
 
-/* SIDEBAR DRAWER STYLING */
+/* SIDEBAR DRAWER PANEL */
 .sidebar {
     width: 320px;
     height: 100%;
@@ -38,7 +38,7 @@ body, html {
 
 .sidebar-header h2 {
     font-size: 22px;
-    color: #ff3366;
+    color: #ff3366; /* Cherry Pink Theme */
     margin-bottom: 8px;
 }
 
@@ -88,7 +88,7 @@ body, html {
     color: #aaaaaa;
 }
 
-/* CAMERA HOUSING VIEWPORT STYLING */
+/* CAMERA SPLIT CONTAINER SCREEN */
 .camera-area {
     position: relative;
     flex-grow: 1;
@@ -96,31 +96,29 @@ body, html {
     background: #000;
 }
 
-#viewfinder {
+/* Forces both layers to align identically */
+#viewfinder, #overlayCanvas {
     width: 100%;
     height: 100%;
-    object-fit: cover;
     position: absolute;
     top: 0;
     left: 0;
+}
+
+#viewfinder {
+    object-fit: cover;
     z-index: 1;
 }
 
-/* FIXED THE GLASS WALL BLOCKER */
 #overlayCanvas {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 3;
-    pointer-events: none; /* Crucial: Clicks will now pass directly through this */
+    z-index: 5;
+    pointer-events: none; /* Clicks drop straight through to buttons below */
 }
 
-/* Translucent Type Strip Overlay Layout */
+/* Context Text Typing Row Strip */
 .text-overlay-container {
     position: absolute;
-    top: 65%;
+    top: 60%;
     width: 100%;
     background: rgba(0, 0, 0, 0.6);
     z-index: 15;
@@ -148,7 +146,7 @@ body, html {
     justify-content: center;
     gap: 10px;
     padding: 10px;
-    z-index: 25; /* Pushed above everything to receive clicks */
+    z-index: 25;
 }
 
 .filter-selector button {
@@ -175,7 +173,7 @@ body, html {
     width: 100%;
     display: flex;
     justify-content: center;
-    z-index: 25; /* Pushed above the canvas block zone */
+    z-index: 25;
 }
 
 #shutter-btn {
