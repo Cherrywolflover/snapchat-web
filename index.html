@@ -3,40 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cherry Chat Filter</title>
+    <title>CherryChat :D</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="app-container">
-        <!-- Crisp view camera element -->
-        <video id="viewfinder" autoplay playsinline></video>
         
-        <!-- Live Snap Overlay Canvas -->
-        <canvas id="photoCanvas" style="display:none;"></canvas>
-
-        <!-- Big Screen-Centered Graphic Filter Display Overlay -->
-        <div id="filter-graphic-overlay"></div>
-
-        <!-- Snapchat Style Text Overlay Box -->
-        <div class="text-overlay-container" id="text-container">
-            <input type="text" id="snap-text" placeholder="Tap to type..." maxlength="50">
+        <!-- NEW CHAT SIDEBAR PANEL -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>🍒 CherryChat</h2>
+                <div class="profile-badge">👤 cheryl0</div>
+            </div>
+            
+            <div class="chat-section">
+                <h3>💬 Chats</h3>
+                <div class="chat-item active-chat">
+                    <span class="chat-icon">🤖</span>
+                    <div class="chat-info">
+                        <h4>Coding Assistant</h4>
+                        <p>Let's build this app!</p>
+                    </div>
+                </div>
+                <div class="chat-item">
+                    <span class="chat-icon">🦄</span>
+                    <div class="chat-info">
+                        <h4>Bestie</h4>
+                        <p>Sent a snap • 2m ago</p>
+                    </div>
+                </div>
+                <div class="chat-item">
+                    <span class="chat-icon">🐱</span>
+                    <div class="chat-info">
+                        <h4>Cat Lover</h4>
+                        <p>Opened • 1h ago</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Filter Action Selection Carousel -->
-        <div class="filter-selector">
-            <button onclick="applySnapFilter('none')" class="active">None</button>
-            <button onclick="applySnapFilter('unicorn')">🦄 Unicorn</button>
-            <button onclick="applySnapFilter('halo')">😇 Angel</button>
-            <button onclick="applySnapFilter('glasses')">😎 Sunglasses</button>
-            <button onclick="applySnapFilter('dog')">🐶 Dog</button>
-            <button onclick="applySnapFilter('cat')">🐱 Cat</button>
+        <!-- YOUR ORIGINAL CAMERA VIEW AREA -->
+        <div class="camera-area">
+            <!-- Crisp view camera element -->
+            <video id="viewfinder" autoplay playsinline></video>
+            
+            <!-- Live Snap Overlay Canvas -->
+            <canvas id="photoCanvas" style="display:none;"></canvas>
+
+            <!-- Big Screen-Centered Graphic Filter Display Overlay -->
+            <div id="filter-graphic-overlay"></div>
+
+            <!-- Snapchat Style Text Overlay Box -->
+            <div class="text-overlay-container" id="text-container">
+                <input type="text" id="snap-text" placeholder="Tap to type..." maxlength="50">
+            </div>
+
+            <!-- Filter Action Selection Carousel -->
+            <div class="filter-selector">
+                <button onclick="applySnapFilter('none')" class="active">None</button>
+                <button onclick="applySnapFilter('unicorn')">🦄 Unicorn</button>
+                <button onclick="applySnapFilter('halo')">😇 Angel</button>
+                <button onclick="applySnapFilter('glasses')">😎 Sunglasses</button>
+                <button onclick="applySnapFilter('dog')">🐶 Dog</button>
+                <button onclick="applySnapFilter('cat')">🐱 Cat</button>
+            </div>
+
+            <!-- UI Elements -->
+            <div class="ui-container">
+                <button id="shutter-btn"></button>
+            </div>
         </div>
 
-        <!-- UI Elements -->
-        <div class="ui-container">
-            <button id="shutter-btn"></button>
-        </div>
     </div>
 
     <script src="app.js"></script>
