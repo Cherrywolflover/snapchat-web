@@ -10,7 +10,7 @@
 
     <div class="app-container">
         
-        <!-- NEW CHAT SIDEBAR PANEL -->
+        <!-- SIDEBAR DRAWER -->
         <div class="sidebar">
             <div class="sidebar-header">
                 <h2>🍒 CherryChat</h2>
@@ -43,23 +43,17 @@
             </div>
         </div>
 
-        <!-- YOUR ORIGINAL CAMERA VIEW AREA -->
+        <!-- CAMERA DISPLAY WINDOW -->
         <div class="camera-area">
-            <!-- Crisp view camera element -->
             <video id="viewfinder" autoplay playsinline></video>
-            
-            <!-- Live Snap Overlay Canvas -->
             <canvas id="photoCanvas" style="display:none;"></canvas>
-
-            <!-- Big Screen-Centered Graphic Filter Display Overlay -->
             <div id="filter-graphic-overlay"></div>
 
-            <!-- Snapchat Style Text Overlay Box -->
             <div class="text-overlay-container" id="text-container">
                 <input type="text" id="snap-text" placeholder="Tap to type..." maxlength="50">
             </div>
 
-            <!-- Filter Action Selection Carousel -->
+            <!-- FILTERS SELECTION SLIDER -->
             <div class="filter-selector">
                 <button onclick="applySnapFilter('none')" class="active">None</button>
                 <button onclick="applySnapFilter('unicorn')">🦄 Unicorn</button>
@@ -69,7 +63,6 @@
                 <button onclick="applySnapFilter('cat')">🐱 Cat</button>
             </div>
 
-            <!-- UI Elements -->
             <div class="ui-container">
                 <button id="shutter-btn"></button>
             </div>
@@ -80,4 +73,3 @@
     <script src="app.js"></script>
 </body>
 </html>
-
