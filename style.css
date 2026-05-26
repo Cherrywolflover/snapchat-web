@@ -18,7 +18,6 @@ body, html {
     height: 100vh;
 }
 
-/* SIDEBAR DRAWER PANEL */
 .sidebar {
     width: 320px;
     height: 100%;
@@ -38,7 +37,7 @@ body, html {
 
 .sidebar-header h2 {
     font-size: 22px;
-    color: #ff3366; /* Cherry Pink Theme */
+    color: #ff3366;
     margin-bottom: 8px;
 }
 
@@ -52,16 +51,6 @@ body, html {
 
 .chat-section {
     padding: 15px;
-    overflow-y: auto;
-    flex-grow: 1;
-}
-
-.chat-section h3 {
-    font-size: 12px;
-    text-transform: uppercase;
-    color: #666;
-    margin-bottom: 10px;
-    letter-spacing: 1px;
 }
 
 .chat-item {
@@ -69,26 +58,14 @@ body, html {
     align-items: center;
     padding: 12px;
     border-radius: 10px;
-    margin-bottom: 8px;
     background: #232323;
 }
 
-.chat-icon {
-    font-size: 24px;
-    margin-right: 12px;
-}
+.chat-icon { font-size: 24px; margin-right: 12px; }
+.chat-info h4 { font-size: 15px; margin-bottom: 2px; }
+.chat-info p { font-size: 12px; color: #aaaaaa; }
 
-.chat-info h4 {
-    font-size: 15px;
-    margin-bottom: 2px;
-}
-
-.chat-info p {
-    font-size: 12px;
-    color: #aaaaaa;
-}
-
-/* CAMERA SPLIT CONTAINER SCREEN */
+/* RE-ENHANCED AI DISPLAY HOUSING LAYER */
 .camera-area {
     position: relative;
     flex-grow: 1;
@@ -96,26 +73,15 @@ body, html {
     background: #000;
 }
 
-/* Forces both layers to align identically */
-#viewfinder, #overlayCanvas {
+#overlayCanvas {
     width: 100%;
     height: 100%;
     position: absolute;
     top: 0;
     left: 0;
-}
-
-#viewfinder {
-    object-fit: cover;
-    z-index: 1;
-}
-
-#overlayCanvas {
     z-index: 5;
-    pointer-events: none; /* Clicks drop straight through to buttons below */
 }
 
-/* Context Text Typing Row Strip */
 .text-overlay-container {
     position: absolute;
     top: 60%;
@@ -158,7 +124,6 @@ body, html {
     cursor: pointer;
     font-size: 13px;
     font-weight: bold;
-    outline: none;
 }
 
 .filter-selector button.active {
