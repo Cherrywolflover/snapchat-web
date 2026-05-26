@@ -1,63 +1,135 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CherryChat :D</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+const video = document.getElementById('viewfinder');
+const canvas = document.getElementById('photoCanvas');
+const overlayCanvas = document.getElementById('overlayCanvas');
+const oCtx = overlayCanvas.getContext('2d');
+const shutterBtn = document.getElementById('shutter-btn');
+const textContainer = document.getElementById('text-container');
+const textInput = document.getElementById('snap-text');
+const cameraZone = document.getElementById('camera-click-zone');
 
-    <div class="app-container">
+let activeFilter = 'none';
+let currentText = "";
+
+const filterAssets = {
+    unicorn: new Image(),
+    halo: new Image(),
+    glasses: new Image()
+};
+
+filterAssets.unicorn.src = "https://imgur.com"; 
+filterAssets.halo.src = "https://imgur.com";    
+filterAssets.glasses.src = "https://imgur.com"; 
+
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "user" }, 
+            audio: false 
+        });
+        video.srcObject = stream;
+        video.addEventListener('loadedmetadata', drawOverlayLoop);
+    } catch (err) {
+        console.error("Camera connection failed.", err);
+    }
+}
+
+// Fixed filter routine checking event parameter values correctly
+window.applyCherryFilter = function(filterType, event) {
+    if (event) event.stopPropagation(); 
+    activeFilter = filterType;
+    
+    document.querySelectorAll('.filter-selector button').forEach(btn => btn.classList.remove('active'));
+    
+    const targetBtn = document.getElementById(`btn-${filterType}`);
+    if (targetBtn) targetBtn.classList.add('active');
+}
+
+if (cameraZone) {
+    cameraZone.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
         
-        <!-- SIDEBAR DRAWER PANEL -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>🍒 CherryChat</h2>
-                <div class="profile-badge" id="user-display-tag">👤 cheryl0</div>
-            </div>
+        if (textContainer.style.display === 'none' || textContainer.style.display === '') {
+            textContainer.style.display = 'flex';
+            textInput.focus();
+        } else if (textInput.value.trim() === "") {
+            textContainer.style.display = 'none';
+        }
+    });
+}
+
+textInput.addEventListener('input', () => {
+    currentText = textInput.value;
+});
+
+textInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        textInput.blur();
+        if (currentText.trim() === "") textContainer.style.display = 'none';
+    }
+});
+
+function drawOverlayLoop() {
+    if (overlayCanvas.width !== video.videoWidth) {
+        overlayCanvas.width = video.videoWidth || 640;
+        overlayCanvas.height = video.videoHeight || 480;
+    }
+
+    oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+    if (activeFilter !== 'none') {
+        const img = filterAssets[activeFilter];
+        if (img && img.complete) {
+            let w, h, x, y;
             
-            <!-- Dynamic Messaging Panel Area -->
-            <div class="chat-section" id="active-chat-tray">
-                <h3>💬 Chats</h3>
-                <div class="chat-item active-chat">
-                    <span class="chat-icon">🤖</span>
-                    <div class="chat-info">
-                        <h4>Coding Assistant</h4>
-                        <p>Let's activate real chats next!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RE-ENGINEERED CAMERA INTERFACE -->
-        <div class="camera-area" id="camera-click-zone">
-            <video id="viewfinder" autoplay playsinline></video>
-            <canvas id="photoCanvas" style="display:none;"></canvas>
+            if (activeFilter === 'unicorn') {
+                w = overlayCanvas.width * 0.22;
+                h = w * (img.height / img.width);
+                x = (overlayCanvas.width / 2) - (w / 2);
+                y = overlayCanvas.height * 0.18; 
+            } else if (activeFilter === 'halo') {
+                w = overlayCanvas.width * 0.35;
+                h = w * (img.height / img.width);
+                x = (overlayCanvas.width / 2) - (w / 2);
+                y = overlayCanvas.height * 0.05; 
+            } else if (activeFilter === 'glasses') {
+                w = overlayCanvas.width * 0.40;
+                h = w * (img.height / img.width);
+                x = (overlayCanvas.width / 2) - (w / 2);
+                y = overlayCanvas.height * 0.38; 
+            }
             
-            <!-- Graphic canvas overlay layer replacing text blocks -->
-            <canvas id="overlayCanvas"></canvas>
+            oCtx.drawImage(img, x, y, w, h);
+        }
+    }
 
-            <!-- Dynamic Hidden Context Input Field -->
-            <div class="text-overlay-container" id="text-container" style="display: none;">
-                <input type="text" id="snap-text" placeholder="Type something..." maxlength="45">
-            </div>
+    if (currentText.trim() !== "") {
+        oCtx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        oCtx.fillRect(0, overlayCanvas.height * 0.65, overlayCanvas.width, overlayCanvas.height * 0.08);
+        
+        oCtx.fillStyle = "white";
+        oCtx.font = `bold ${overlayCanvas.width * 0.038}px sans-serif`;
+        oCtx.textAlign = "center";
+        oCtx.textBaseline = "middle";
+        oCtx.fillText(currentText, overlayCanvas.width / 2, overlayCanvas.height * 0.69);
+    }
 
-            <!-- FILTER ROTATION PANEL -->
-            <div class="filter-selector">
-                <button onclick="applyCherryFilter('none')" class="active" id="btn-none">None</button>
-                <button onclick="applyCherryFilter('unicorn')" id="btn-unicorn">🦄 Horn</button>
-                <button onclick="applyCherryFilter('halo')" id="btn-halo">😇 Halo</button>
-                <button onclick="applyCherryFilter('glasses')" id="btn-glasses">😎 Glasses</button>
-            </div>
+    requestAnimationFrame(drawOverlayLoop);
+}
 
-            <div class="ui-container">
-                <button id="shutter-btn"></button>
-            </div>
-        </div>
+shutterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const ctx = canvas.getContext('2d');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(overlayCanvas, 0, 0, canvas.width, canvas.height);
+    
+    const snapImage = canvas.toDataURL('image/jpeg', 0.95);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = snapImage;
+    downloadLink.download = `cherrychat_${Date.now()}.jpg`;
+    downloadLink.click();
+});
 
-    </div>
-
-    <script src="app.js"></script>
-</body>
-</html>
+startCamera();
