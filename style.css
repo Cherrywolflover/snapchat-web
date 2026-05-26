@@ -9,7 +9,7 @@ body, html {
     height: 100%;
     background-color: #000;
     overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .app-container {
@@ -18,7 +18,7 @@ body, html {
     height: 100vh;
 }
 
-#viewfinder {
+#arCanvas {
     width: 100vw;
     height: 100vh;
     object-fit: cover;
@@ -26,7 +26,6 @@ body, html {
     top: 0;
     left: 0;
     z-index: 1;
-    transition: filter 0.3s ease;
 }
 
 /* Snapchat Text Bar overlay */
@@ -34,7 +33,7 @@ body, html {
     position: absolute;
     top: 45%;
     width: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
     z-index: 5;
     padding: 10px 0;
     display: flex;
@@ -47,46 +46,47 @@ body, html {
     border: none;
     outline: none;
     color: white;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
     text-align: center;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
 }
 
-#snap-text::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-    font-weight: normal;
-}
-
-/* Filter Label Indicator */
-#filter-label {
-    position: absolute;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: bold;
-    z-index: 10;
-    pointer-events: none;
-}
-
-.swipe-hint {
+/* Filter Selector Horizontal Row */
+.filter-selector {
     position: absolute;
     bottom: 140px;
     width: 100%;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px;
     z-index: 10;
-    pointer-events: none;
+}
+
+.filter-selector button {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    outline: none;
+}
+
+.filter-selector button.active {
+    background: #fffc00;
+    color: black;
+    border-color: #fffc00;
 }
 
 .ui-container {
     position: absolute;
-    bottom: 40px;
+    bottom: 30px;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -94,24 +94,15 @@ body, html {
 }
 
 #shutter-btn {
-    width: 85px;
-    height: 85px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background-color: transparent;
     border: 6px solid #fff;
     cursor: pointer;
-    box-shadow: 0 0 15px rgba(0,0,0,0.3);
-    transition: transform 0.1s ease;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
 }
 
 #shutter-btn:active {
-    transform: scale(0.9);
-    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(0.92);
 }
-
-/* Color Filter Classes */
-.filter-bnw { filter: grayscale(1); }
-.filter-vintage { filter: sepia(0.7) contrast(1.1); }
-.filter-neon { filter: hue-rotate(90deg) saturate(2); }
-.filter-warm { filter: sepia(0.2) saturate(1.4); }
-
