@@ -1,106 +1,114 @@
 const video = document.getElementById('viewfinder');
-const canvas = document.getElementById('photoCanvas');
+const canvas = document.getElementById('arCanvas');
+const ctx = canvas.getContext('2d');
 const shutterBtn = document.getElementById('shutter-btn');
 const textInput = document.getElementById('snap-text');
-const filterLabel = document.getElementById('filter-label');
 
-// List of available filters
-const filters = [
-    { name: "Normal", class: "" },
-    { name: "Black & White", class: "filter-bnw" },
-    { name: "Vintage", class: "filter-vintage" },
-    { name: "Neon", class: "filter-neon" },
-    { name: "Warm Glow", class: "filter-warm" }
-];
-let currentFilterIndex = 0;
+let activeFilter = 'none';
 
-// 1. Start High-Quality 1080p HD Camera
-async function startCamera() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: "user",
-                width: { ideal: 1920 },  // Force Full HD Width
-                height: { ideal: 1080 }  // Force Full HD Height
-            }, 
-            audio: false 
-        });
-        video.srcObject = stream;
-    } catch (err) {
-        alert("Camera access denied. Please enable high-res camera access!");
+// Define assets using emoji strings rendered onto canvas
+const filterAssets = {
+    unicorn: { emoji: "🦄", offset: { x: 0, y: -0.6 }, sizeScale: 1.2, pointIndex: 10 },
+    halo: { emoji: "😇", offset: { x: 0, y: -0.8 }, sizeScale: 1.5, pointIndex: 10 },
+    glasses: { emoji: "😎", offset: { x: 0, y: 0.1 }, sizeScale: 1.1, pointIndex: 168 },
+    dog: { emoji: "🐶", offset: { x: 0, y: -0.2 }, sizeScale: 1.6, pointIndex: 1 },
+    cat: { emoji: "🐱", offset: { x: 0, y: -0.1 }, sizeScale: 1.5, pointIndex: 1 }
+};
+
+function changeARFilter(filterName) {
+    activeFilter = filterName;
+    document.querySelectorAll('.filter-selector button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// MediaPipe data collection pipeline 
+function onResults(results) {
+    // Sync canvas sizing configuration dynamically
+    if (canvas.width !== video.videoWidth) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
     }
-}
 
-// 2. Filter Switching Logic
-function applyFilter(index) {
-    // Remove all old filter classes
-    filters.forEach(f => { if(f.class) video.classList.remove(f.class); });
+    ctx.save();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    currentFilterIndex = (index + filters.length) % filters.length;
-    const nextFilter = filters[currentFilterIndex];
-    
-    if(nextFilter.class) video.classList.add(nextFilter.class);
-    filterLabel.innerText = nextFilter.name;
-}
+    // Render the base camera image layer
+    if (results.image) {
+        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+    }
 
-// Listen for keyboard arrows on desktop to change filters
-window.addEventListener('keydown', (e) => {
-    if (document.activeElement === textInput) return; // Don't swap filters while typing
-    if (e.key === 'ArrowRight') applyFilter(currentFilterIndex + 1);
-    if (e.key === 'ArrowLeft') applyFilter(currentFilterIndex - 1);
-});
-
-// Mobile Swipe Detection
-let touchStartX = 0;
-window.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
-window.addEventListener('touchend', e => {
-    let touchEndX = e.changedTouches[0].screenX;
-    if (document.activeElement === textInput) return;
-    if (touchStartX - touchEndX > 50) applyFilter(currentFilterIndex + 1); // Swiped Left
-    if (touchEndX - touchStartX > 50) applyFilter(currentFilterIndex - 1); // Swiped Right
-});
-
-// 3. Capture Photo with Baked Filters & Text
-shutterBtn.addEventListener('click', () => {
-    const ctx = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Apply matching canvas CSS filters to look identical to live screen
-    const currentFilter = filters[currentFilterIndex];
-    if (currentFilter.name === "Black & White") ctx.filter = "grayscale(1)";
-    else if (currentFilter.name === "Vintage") ctx.filter = "sepia(0.7) contrast(1.1)";
-    else if (currentFilter.name === "Neon") ctx.filter = "hue-rotate(90deg) saturate(2)";
-    else if (currentFilter.name === "Warm Glow") ctx.filter = "sepia(0.2) saturate(1.4)";
-    else ctx.filter = "none";
-
-    // Draw video frame onto canvas
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Burn text overlay onto image if the user typed something
-    if (textInput.value.trim() !== "") {
-        ctx.filter = "none"; // Reset filter so text stays crisp white
+    // Process face anchor positions
+    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0 && activeFilter !== 'none') {
+        const landmarks = results.multiFaceLandmarks[0];
+        const config = filterAssets[activeFilter];
         
-        // Draw the translucent text bar background
-        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-        ctx.fillRect(0, canvas.height * 0.45, canvas.width, canvas.height * 0.07);
+        // Target structural landmark index mapping anchor
+        const anchor = landmarks[config.pointIndex];
+        const x = anchor.x * canvas.width;
+        const y = anchor.y * canvas.height;
+
+        // Estimate proportional scale tracking using width between eye corners
+        const leftEye = landmarks[33];
+        const rightEye = landmarks[263];
+        const faceWidth = Math.hypot((leftEye.x - rightEye.x) * canvas.width, (leftEye.y - rightEye.y) * canvas.height);
         
-        // Setup typography text settings scaled to high resolution
-        ctx.fillStyle = "white";
-        ctx.font = `bold ${canvas.width * 0.035}px sans-serif`;
+        const assetSize = faceWidth * config.sizeScale;
+        
+        // Apply coordinate offset calibrations
+        const drawX = x + (config.offset.x * assetSize);
+        const drawY = y + (config.offset.y * assetSize);
+
+        // Draw the decorative overlay 
+        ctx.font = `${assetSize}px serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
+        ctx.fillText(config.emoji, drawX, drawY);
+    }
+
+    // Render text banner if user input exists
+    if (textInput.value.trim() !== "") {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+        ctx.fillRect(0, canvas.height * 0.45, canvas.width, canvas.height * 0.07);
         
-        // Draw text characters right in center of the container bar
+        ctx.fillStyle = "white";
+        ctx.font = `bold ${canvas.width * 0.04}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         ctx.fillText(textInput.value, canvas.width / 2, canvas.height * 0.485);
     }
-    
-    // Auto Download final photo asset
+
+    ctx.restore();
+}
+
+// Initialize MediaPipe FaceMesh engine configuration
+const faceMesh = new FaceMesh({
+    locateFile: (file) => `https://jsdelivr.net{file}`
+});
+
+faceMesh.setOptions({
+    maxNumFaces: 1,
+    refineLandmarks: true,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+});
+faceMesh.onResults(onResults);
+
+// Setup Camera capture engine pipeline
+const camera = new Camera(video, {
+    onFrame: async () => {
+        await faceMesh.send({ image: video });
+    },
+    width: 1280,
+    height: 720
+});
+
+camera.start().catch(err => alert("Camera configuration failure: " + err));
+
+// Download button capture logic flow
+shutterBtn.addEventListener('click', () => {
     const snapImage = canvas.toDataURL('image/jpeg', 0.95);
     const downloadLink = document.createElement('a');
     downloadLink.href = snapImage;
-    downloadLink.download = `snap_pro_${Date.now()}.jpg`;
+    downloadLink.download = `snap_ar_${Date.now()}.jpg`;
     downloadLink.click();
 });
-
-startCamera();
