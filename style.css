@@ -12,15 +12,104 @@ body, html {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* Flex layout splits the screen into a left column and right column */
 .app-container {
-    position: relative;
+    display: flex;
     width: 100vw;
     height: 100vh;
 }
 
+/* SIDEBAR PANEL STYLING */
+.sidebar {
+    width: 320px;
+    height: 100%;
+    background-color: #1a1a1a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #2d2d2d;
+    z-index: 20;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #2d2d2d;
+    background-color: #121212;
+}
+
+.sidebar-header h2 {
+    font-size: 22px;
+    color: #ff3366; /* Cherry Pink Theme Color */
+    margin-bottom: 8px;
+}
+
+.profile-badge {
+    background: #2d2d2d;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 13px;
+    display: inline-block;
+}
+
+.chat-section {
+    padding: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.chat-section h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.chat-item:hover {
+    background: #252525;
+}
+
+.active-chat {
+    background: #2d2d2d;
+    border-left: 4px solid #ff3366;
+}
+
+.chat-icon {
+    font-size: 24px;
+    margin-right: 12px;
+}
+
+.chat-info h4 {
+    font-size: 15px;
+    margin-bottom: 2px;
+}
+
+.chat-info p {
+    font-size: 12px;
+    color: #aaaaaa;
+}
+
+/* CAMERA HOUSING STYLING */
+.camera-area {
+    position: relative;
+    flex-grow: 1;
+    height: 100%;
+    background: #000;
+}
+
 #viewfinder {
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     position: absolute;
     top: 0;
@@ -28,23 +117,21 @@ body, html {
     z-index: 1;
 }
 
-/* Big central overlay for our target decorations */
 #filter-graphic-overlay {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 150px;
     z-index: 3;
-    pointer-events: none; 
+    pointer-events: none;
     user-select: none;
 }
 
-/* Translucent Type Area Overlay */
 .text-overlay-container {
     position: absolute;
     top: 50%;
@@ -68,7 +155,6 @@ body, html {
     text-align: center;
 }
 
-/* Clean Snapchat horizontal picker tray */
 .filter-selector {
     position: absolute;
     bottom: 140px;
@@ -93,9 +179,9 @@ body, html {
 }
 
 .filter-selector button.active {
-    background: #fffc00;
-    color: black;
-    border-color: #fffc00;
+    background: #ff3366;
+    color: white;
+    border-color: #ff3366;
 }
 
 .ui-container {
@@ -116,4 +202,3 @@ body, html {
     cursor: pointer;
     box-shadow: 0 0 15px rgba(0,0,0,0.4);
 }
-
