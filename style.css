@@ -18,7 +18,7 @@ body, html {
     height: 100vh;
 }
 
-#arCanvas {
+#viewfinder {
     width: 100vw;
     height: 100vh;
     object-fit: cover;
@@ -28,14 +28,31 @@ body, html {
     z-index: 1;
 }
 
-/* Snapchat Text Bar overlay */
+/* Big central overlay for our target decorations */
+#filter-graphic-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 150px;
+    z-index: 3;
+    pointer-events: none; 
+    user-select: none;
+}
+
+/* Translucent Type Area Overlay */
 .text-overlay-container {
     position: absolute;
-    top: 45%;
+    top: 50%;
+    transform: translateY(-50%);
     width: 100%;
     background: rgba(0, 0, 0, 0.4);
     z-index: 5;
-    padding: 10px 0;
+    padding: 12px 0;
     display: flex;
     justify-content: center;
 }
@@ -49,18 +66,16 @@ body, html {
     font-size: 22px;
     font-weight: bold;
     text-align: center;
-    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
 }
 
-/* Filter Selector Horizontal Row */
+/* Clean Snapchat horizontal picker tray */
 .filter-selector {
     position: absolute;
     bottom: 140px;
     width: 100%;
     display: flex;
     justify-content: center;
-    gap: 8px;
-    overflow-x: auto;
+    gap: 10px;
     padding: 10px;
     z-index: 10;
 }
@@ -69,12 +84,11 @@ body, html {
     background: rgba(0, 0, 0, 0.6);
     color: white;
     border: 2px solid rgba(255, 255, 255, 0.4);
-    padding: 8px 14px;
+    padding: 10px 16px;
     border-radius: 20px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: bold;
-    white-space: nowrap;
     outline: none;
 }
 
@@ -103,6 +117,3 @@ body, html {
     box-shadow: 0 0 15px rgba(0,0,0,0.4);
 }
 
-#shutter-btn:active {
-    transform: scale(0.92);
-}
