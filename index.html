@@ -3,37 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snapchat Web Pro</title>
+    <title>Snapchat Web AR</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- MediaPipe AI Face Tracking Dependencies -->
+    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
+    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
 </head>
 <body>
 
-    <!-- Main Container -->
     <div class="app-container">
-        <!-- Live Camera Viewfinder -->
-        <video id="viewfinder" autoplay playsinline></video>
+        <!-- Hidden video element feeds the AI tracking engine -->
+        <video id="viewfinder" autoplay playsinline style="display:none;"></video>
+        
+        <!-- Live AR Canvas view where assets are drawn onto your face -->
+        <canvas id="arCanvas"></canvas>
 
-        <!-- Hidden Canvas for high-res photo capture -->
-        <canvas id="photoCanvas" style="display:none;"></canvas>
-
-        <!-- Snapchat Style Text Overlay Box -->
+        <!-- Snapchat Text Overlay Box -->
         <div class="text-overlay-container" id="text-container">
             <input type="text" id="snap-text" placeholder="Tap to type..." maxlength="50">
         </div>
 
-        <!-- Filter Name Indicator -->
-        <div id="filter-label">Normal</div>
+        <!-- Filter Selector Row -->
+        <div class="filter-selector">
+            <button onclick="changeARFilter('none')" class="active">None</button>
+            <button onclick="changeARFilter('unicorn')">🦄 Unicorn</button>
+            <button onclick="changeARFilter('halo')">😇 Angel</button>
+            <button onclick="changeARFilter('glasses')">😎 Sunglasses</button>
+            <button onclick="changeARFilter('dog')">🐶 Dog</button>
+            <button onclick="changeARFilter('cat')">🐱 Cat</button>
+        </div>
 
-        <!-- UI Elements -->
+        <!-- UI Capture Elements -->
         <div class="ui-container">
             <button id="shutter-btn"></button>
         </div>
-        
-        <!-- Helpful Swipe Instructions Hint -->
-        <div class="swipe-hint">Swipe left/right for filters</div>
     </div>
 
     <script src="app.js"></script>
 </body>
 </html>
-
