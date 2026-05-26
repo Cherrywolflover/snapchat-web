@@ -3,38 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snapchat Web AR</title>
+    <title>Snapchat Web Filter</title>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- MediaPipe AI Face Tracking Dependencies -->
-    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
-    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
 </head>
 <body>
 
     <div class="app-container">
-        <!-- Hidden video element feeds the AI tracking engine -->
-        <video id="viewfinder" autoplay playsinline style="display:none;"></video>
+        <!-- Crisp view camera element -->
+        <video id="viewfinder" autoplay playsinline></video>
         
-        <!-- Live AR Canvas view where assets are drawn onto your face -->
-        <canvas id="arCanvas"></canvas>
+        <!-- Live Snap Overlay Canvas -->
+        <canvas id="photoCanvas" style="display:none;"></canvas>
 
-        <!-- Snapchat Text Overlay Box -->
+        <!-- Big Screen-Centered Graphic Filter Display Overlay -->
+        <div id="filter-graphic-overlay"></div>
+
+        <!-- Snapchat Style Text Overlay Box -->
         <div class="text-overlay-container" id="text-container">
             <input type="text" id="snap-text" placeholder="Tap to type..." maxlength="50">
         </div>
 
-        <!-- Filter Selector Row -->
+        <!-- Filter Action Selection Carousel -->
         <div class="filter-selector">
-            <button onclick="changeARFilter('none')" class="active">None</button>
-            <button onclick="changeARFilter('unicorn')">🦄 Unicorn</button>
-            <button onclick="changeARFilter('halo')">😇 Angel</button>
-            <button onclick="changeARFilter('glasses')">😎 Sunglasses</button>
-            <button onclick="changeARFilter('dog')">🐶 Dog</button>
-            <button onclick="changeARFilter('cat')">🐱 Cat</button>
+            <button onclick="applySnapFilter('none')" class="active">None</button>
+            <button onclick="applySnapFilter('unicorn')">🦄 Unicorn</button>
+            <button onclick="applySnapFilter('halo')">😇 Angel</button>
+            <button onclick="applySnapFilter('glasses')">😎 Sunglasses</button>
+            <button onclick="applySnapFilter('dog')">🐶 Dog</button>
+            <button onclick="applySnapFilter('cat')">🐱 Cat</button>
         </div>
 
-        <!-- UI Capture Elements -->
+        <!-- UI Elements -->
         <div class="ui-container">
             <button id="shutter-btn"></button>
         </div>
@@ -43,3 +42,4 @@
     <script src="app.js"></script>
 </body>
 </html>
+
