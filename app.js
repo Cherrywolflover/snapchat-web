@@ -1,114 +1,78 @@
 const video = document.getElementById('viewfinder');
-const canvas = document.getElementById('arCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('photoCanvas');
+const graphicOverlay = document.getElementById('filter-graphic-overlay');
 const shutterBtn = document.getElementById('shutter-btn');
 const textInput = document.getElementById('snap-text');
 
-let activeFilter = 'none';
+let activeEmoji = "";
 
-// Define assets using emoji strings rendered onto canvas
-const filterAssets = {
-    unicorn: { emoji: "🦄", offset: { x: 0, y: -0.6 }, sizeScale: 1.2, pointIndex: 10 },
-    halo: { emoji: "😇", offset: { x: 0, y: -0.8 }, sizeScale: 1.5, pointIndex: 10 },
-    glasses: { emoji: "😎", offset: { x: 0, y: 0.1 }, sizeScale: 1.1, pointIndex: 168 },
-    dog: { emoji: "🐶", offset: { x: 0, y: -0.2 }, sizeScale: 1.6, pointIndex: 1 },
-    cat: { emoji: "🐱", offset: { x: 0, y: -0.1 }, sizeScale: 1.5, pointIndex: 1 }
-};
-
-function changeARFilter(filterName) {
-    activeFilter = filterName;
-    document.querySelectorAll('.filter-selector button').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+// Lightweight high-resolution video activation stream
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "user" }, 
+            audio: false 
+        });
+        video.srcObject = stream;
+    } catch (err) {
+        alert("Please confirm camera permissions or close other apps using the webcam!");
+    }
 }
 
-// MediaPipe data collection pipeline 
-function onResults(results) {
-    // Sync canvas sizing configuration dynamically
-    if (canvas.width !== video.videoWidth) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-    }
-
-    ctx.save();
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Immediate item swapping routine
+function applySnapFilter(type) {
+    document.querySelectorAll('.filter-selector button').forEach(btn => btn.classList.remove('active'));
     
-    // Render the base camera image layer
-    if (results.image) {
-        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+    // Safety check to handle event trigger variations
+    if(window.event && window.event.target) {
+        window.event.target.classList.add('active');
     }
 
-    // Process face anchor positions
-    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0 && activeFilter !== 'none') {
-        const landmarks = results.multiFaceLandmarks[0];
-        const config = filterAssets[activeFilter];
-        
-        // Target structural landmark index mapping anchor
-        const anchor = landmarks[config.pointIndex];
-        const x = anchor.x * canvas.width;
-        const y = anchor.y * canvas.height;
+    if (type === 'unicorn') activeEmoji = "🦄";
+    else if (type === 'halo') activeEmoji = "😇";
+    else if (type === 'glasses') activeEmoji = "😎";
+    else if (type === 'dog') activeEmoji = "🐶";
+    else if (type === 'cat') activeEmoji = "🐱";
+    else activeEmoji = "";
 
-        // Estimate proportional scale tracking using width between eye corners
-        const leftEye = landmarks[33];
-        const rightEye = landmarks[263];
-        const faceWidth = Math.hypot((leftEye.x - rightEye.x) * canvas.width, (leftEye.y - rightEye.y) * canvas.height);
-        
-        const assetSize = faceWidth * config.sizeScale;
-        
-        // Apply coordinate offset calibrations
-        const drawX = x + (config.offset.x * assetSize);
-        const drawY = y + (config.offset.y * assetSize);
+    graphicOverlay.innerText = activeEmoji;
+}
 
-        // Draw the decorative overlay 
-        ctx.font = `${assetSize}px serif`;
+// Bakes screen modifications direct into download file asset
+shutterBtn.addEventListener('click', () => {
+    const ctx = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Base photo layout capture layer
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Draw current decorative item overlay onto center screen
+    if (activeEmoji !== "") {
+        ctx.font = `${canvas.width * 0.25}px serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(config.emoji, drawX, drawY);
+        ctx.fillText(activeEmoji, canvas.width / 2, canvas.height / 2);
     }
 
-    // Render text banner if user input exists
+    // Burn text bar elements if values exist
     if (textInput.value.trim() !== "") {
         ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-        ctx.fillRect(0, canvas.height * 0.45, canvas.width, canvas.height * 0.07);
+        ctx.fillRect(0, canvas.height * 0.46, canvas.width, canvas.height * 0.08);
         
         ctx.fillStyle = "white";
         ctx.font = `bold ${canvas.width * 0.04}px sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(textInput.value, canvas.width / 2, canvas.height * 0.485);
+        ctx.fillText(textInput.value, canvas.width / 2, canvas.height * 0.5);
     }
-
-    ctx.restore();
-}
-
-// Initialize MediaPipe FaceMesh engine configuration
-const faceMesh = new FaceMesh({
-    locateFile: (file) => `https://jsdelivr.net{file}`
-});
-
-faceMesh.setOptions({
-    maxNumFaces: 1,
-    refineLandmarks: true,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5
-});
-faceMesh.onResults(onResults);
-
-// Setup Camera capture engine pipeline
-const camera = new Camera(video, {
-    onFrame: async () => {
-        await faceMesh.send({ image: video });
-    },
-    width: 1280,
-    height: 720
-});
-
-camera.start().catch(err => alert("Camera configuration failure: " + err));
-
-// Download button capture logic flow
-shutterBtn.addEventListener('click', () => {
+    
+    // Process local device save action
     const snapImage = canvas.toDataURL('image/jpeg', 0.95);
     const downloadLink = document.createElement('a');
     downloadLink.href = snapImage;
-    downloadLink.download = `snap_ar_${Date.now()}.jpg`;
+    downloadLink.download = `my_snap_${Date.now()}.jpg`;
     downloadLink.click();
 });
+
+startCamera();
