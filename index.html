@@ -3,15 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snapchat Web</title>
+    <title>Snapchat Web Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <video id="viewfinder" autoplay playsinline></video>
-    <canvas id="photoCanvas" style="display:none;"></canvas>
-    <div class="ui-container">
-        <button id="shutter-btn"></button>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Live Camera Viewfinder -->
+        <video id="viewfinder" autoplay playsinline></video>
+
+        <!-- Hidden Canvas for high-res photo capture -->
+        <canvas id="photoCanvas" style="display:none;"></canvas>
+
+        <!-- Snapchat Style Text Overlay Box -->
+        <div class="text-overlay-container" id="text-container">
+            <input type="text" id="snap-text" placeholder="Tap to type..." maxlength="50">
+        </div>
+
+        <!-- Filter Name Indicator -->
+        <div id="filter-label">Normal</div>
+
+        <!-- UI Elements -->
+        <div class="ui-container">
+            <button id="shutter-btn"></button>
+        </div>
+        
+        <!-- Helpful Swipe Instructions Hint -->
+        <div class="swipe-hint">Swipe left/right for filters</div>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
+
