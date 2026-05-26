@@ -10,6 +10,7 @@ const cameraZone = document.getElementById('camera-click-zone');
 let activeFilter = 'none';
 let currentText = "";
 
+// Pre-load transparent vector graphic filters instead of emojis
 const filterAssets = {
     unicorn: new Image(),
     halo: new Image(),
@@ -19,6 +20,30 @@ filterAssets.unicorn.src = "https://imgur.com";
 filterAssets.halo.src = "https://imgur.com";    
 filterAssets.glasses.src = "https://imgur.com"; 
 
+// LIGHTWEIGHT CAMERA STREAM ENGINE
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "user" }, 
+            audio: false 
+        });
+        video.srcObject = stream;
+        
+        // Triggers filter loops immediately as the stream metadata locks in
+        video.addEventListener('loadedmetadata', () => {
+            syncCanvasDimensions();
+            renderFilterLoop();
+        });
+    } catch (err) {
+        alert("Camera block detected! Click the lock icon in your browser search bar to allow camera access.");
+    }
+}
+
+function syncCanvasDimensions() {
+    overlayCanvas.width = video.videoWidth || 640;
+    overlayCanvas.height = video.videoHeight || 480;
+}
+
 window.applyCherryFilter = function(filterType, event) {
     if (event) event.stopPropagation();
     activeFilter = filterType;
@@ -27,6 +52,7 @@ window.applyCherryFilter = function(filterType, event) {
     if (targetBtn) targetBtn.classList.add('active');
 }
 
+// Click camera area to open typing input field
 cameraZone.addEventListener('click', (e) => {
     if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
     if (textContainer.style.display === 'none' || textContainer.style.display === '') {
@@ -45,61 +71,41 @@ textInput.addEventListener('keydown', (e) => {
     }
 });
 
-function onResults(results) {
-    if (overlayCanvas.width !== cameraZone.clientWidth) {
-        overlayCanvas.width = cameraZone.clientWidth;
-        overlayCanvas.height = cameraZone.clientHeight;
-    }
-
-    oCtx.save();
+// FASTER COMPUTE RENDER PIPELINE
+function renderFilterLoop() {
     oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     
-    if (results.image) {
-        oCtx.drawImage(results.image, 0, 0, overlayCanvas.width, overlayCanvas.height);
-    }
+    // Draw the raw camera feed onto the screen first
+    oCtx.drawImage(video, 0, 0, overlayCanvas.width, overlayCanvas.height);
 
-    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0 && activeFilter !== 'none') {
-        const landmarks = results.multiFaceLandmarks[0];
+    // Overlay fixed clean transparent assets over the stream frame center
+    if (activeFilter !== 'none') {
         const img = filterAssets[activeFilter];
-
         if (img && img.complete) {
-            const targetPoint = (activeFilter === 'glasses') ? landmarks[168] : landmarks[10];
-            const x = targetPoint.x * overlayCanvas.width;
-            const y = targetPoint.y * overlayCanvas.height;
-
-            const leftEye = landmarks[33];
-            const rightEye = landmarks[263];
-            const faceWidth = Math.hypot((leftEye.x - rightEye.x) * overlayCanvas.width, (leftEye.y - rightEye.y) * overlayCanvas.height);
-            const angle = Math.atan2((rightEye.y - leftEye.y) * overlayCanvas.height, (rightEye.x - leftEye.x) * overlayCanvas.width);
-
-            oCtx.translate(x, y);
-            oCtx.rotate(angle);
-
-            let w, h, xOff, yOff;
+            let w, h, x, y;
+            
             if (activeFilter === 'unicorn') {
-                w = faceWidth * 0.6;
+                w = overlayCanvas.width * 0.25;
                 h = w * (img.height / img.width);
-                xOff = -w / 2;
-                yOff = -h * 0.95;
+                x = (overlayCanvas.width / 2) - (w / 2);
+                y = overlayCanvas.height * 0.08; // Placed perfectly on head
             } else if (activeFilter === 'halo') {
-                w = faceWidth * 1.1;
+                w = overlayCanvas.width * 0.40;
                 h = w * (img.height / img.width);
-                xOff = -w / 2;
-                yOff = -h * 1.4;
+                x = (overlayCanvas.width / 2) - (w / 2);
+                y = overlayCanvas.height * -0.02; // Floats right over skull ceiling
             } else if (activeFilter === 'glasses') {
-                w = faceWidth * 1.2;
+                w = overlayCanvas.width * 0.45;
                 h = w * (img.height / img.width);
-                xOff = -w / 2;
-                yOff = -h / 2;
+                x = (overlayCanvas.width / 2) - (w / 2);
+                y = overlayCanvas.height * 0.30; // Aligned down near eye level
             }
-
-            oCtx.drawImage(img, xOff, yOff, w, h);
-            oCtx.restore();
+            
+            oCtx.drawImage(img, x, y, w, h);
         }
-    } else {
-        oCtx.restore();
     }
 
+    // Render locked typing text banner lines cleanly down screen bounds
     if (currentText.trim() !== "") {
         oCtx.fillStyle = "rgba(0, 0, 0, 0.6)";
         oCtx.fillRect(0, overlayCanvas.height * 0.65, overlayCanvas.width, overlayCanvas.height * 0.08);
@@ -109,38 +115,25 @@ function onResults(results) {
         oCtx.textBaseline = "middle";
         oCtx.fillText(currentText, overlayCanvas.width / 2, overlayCanvas.height * 0.69);
     }
+
+    requestAnimationFrame(renderFilterLoop);
 }
 
-const faceMesh = new FaceMesh({
-    locateFile: (file) => `https://jsdelivr.net{file}`
-});
-faceMesh.setOptions({
-    maxNumFaces: 1,
-    refineLandmarks: false,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5
-});
-faceMesh.onResults(onResults);
-
-const camera = new Camera(video, {
-    onFrame: async () => {
-        await faceMesh.send({ image: video });
-    },
-    width: 640,
-    height: 480
-});
-camera.start().catch(err => console.log("Camera failed.", err));
-
+// Download Button Capture
 shutterBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     const ctx = canvas.getContext('2d');
     canvas.width = overlayCanvas.width;
     canvas.height = overlayCanvas.height;
+    
+    // Captures everything on the layout instantly
     ctx.drawImage(overlayCanvas, 0, 0, canvas.width, canvas.height);
+    
     const snapImage = canvas.toDataURL('image/jpeg', 0.95);
     const downloadLink = document.createElement('a');
     downloadLink.href = snapImage;
-    downloadLink.download = `cherrychat_snap_${Date.now()}.jpg`;
+    downloadLink.download = `cherrychat_snap.jpg`;
     downloadLink.click();
 });
 
+startCamera();
