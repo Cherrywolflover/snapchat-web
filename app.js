@@ -36,8 +36,7 @@ async function startCamera() {
 }
 
 // Controls filter switching row highlights
-window.applyCherryFilter = function(filterType, event) {
-    if (event) event.stopPropagation(); // Stop click clipping
+window.applyCherryFilter = function(filterType) {
     activeFilter = filterType;
     document.querySelectorAll('.filter-selector button').forEach(btn => btn.classList.remove('active'));
     
@@ -46,16 +45,18 @@ window.applyCherryFilter = function(filterType, event) {
 }
 
 // Click camera viewport container to toggle input typing engine text strip
-cameraZone.addEventListener('click', (e) => {
-    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
-    
-    if (textContainer.style.display === 'none') {
-        textContainer.style.display = 'flex';
-        textInput.focus();
-    } else if (textInput.value.trim() === "") {
-        textContainer.style.display = 'none';
-    }
-});
+if (cameraZone) {
+    cameraZone.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+        
+        if (textContainer.style.display === 'none' || textContainer.style.display === '') {
+            textContainer.style.display = 'flex';
+            textInput.focus();
+        } else if (textInput.value.trim() === "") {
+            textContainer.style.display = 'none';
+        }
+    });
+}
 
 // Watch input typing updates
 textInput.addEventListener('input', () => {
@@ -139,4 +140,3 @@ shutterBtn.addEventListener('click', (e) => {
 });
 
 startCamera();
-
