@@ -6,7 +6,7 @@ const textInput = document.getElementById('snap-text');
 
 let activeEmoji = "";
 
-// Lightweight high-resolution video activation stream
+// Starts standard camera input cleanly inside the box layout area
 async function startCamera() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -15,15 +15,15 @@ async function startCamera() {
         });
         video.srcObject = stream;
     } catch (err) {
-        alert("Please confirm camera permissions or close other apps using the webcam!");
+        console.log("Camera block error: ", err);
     }
 }
 
-// Immediate item swapping routine
-function applySnapFilter(type) {
+// Switches filters instantly when button is clicked
+window.applySnapFilter = function(type) {
     document.querySelectorAll('.filter-selector button').forEach(btn => btn.classList.remove('active'));
     
-    // Safety check to handle event trigger variations
+    // Highlights the active button
     if(window.event && window.event.target) {
         window.event.target.classList.add('active');
     }
@@ -38,16 +38,14 @@ function applySnapFilter(type) {
     graphicOverlay.innerText = activeEmoji;
 }
 
-// Bakes screen modifications direct into download file asset
+// Snaps picture, adds filters/text, and auto-downloads
 shutterBtn.addEventListener('click', () => {
     const ctx = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
     
-    // Base photo layout capture layer
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Draw current decorative item overlay onto center screen
     if (activeEmoji !== "") {
         ctx.font = `${canvas.width * 0.25}px serif`;
         ctx.textAlign = "center";
@@ -55,7 +53,6 @@ shutterBtn.addEventListener('click', () => {
         ctx.fillText(activeEmoji, canvas.width / 2, canvas.height / 2);
     }
 
-    // Burn text bar elements if values exist
     if (textInput.value.trim() !== "") {
         ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
         ctx.fillRect(0, canvas.height * 0.46, canvas.width, canvas.height * 0.08);
@@ -67,11 +64,10 @@ shutterBtn.addEventListener('click', () => {
         ctx.fillText(textInput.value, canvas.width / 2, canvas.height * 0.5);
     }
     
-    // Process local device save action
     const snapImage = canvas.toDataURL('image/jpeg', 0.95);
     const downloadLink = document.createElement('a');
     downloadLink.href = snapImage;
-    downloadLink.download = `my_snap_${Date.now()}.jpg`;
+    downloadLink.download = `cherrychat_snap.jpg`;
     downloadLink.click();
 });
 
