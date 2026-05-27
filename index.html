@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClassChat Desktop</title>
+    <title>CherryChat Hybrid Desktop</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-       <!-- DISCORD REGISTRATION & LOGIN WALL -->
+    <!-- CHERRYCHAT AUTHENTICATION GATE -->
     <div id="auth-wall" class="screen-auth">
         <div class="auth-container">
             <div class="auth-tabs">
@@ -16,11 +16,10 @@
                 <div class="auth-tab" id="tab-btn-login" onclick="switchAuthTab('login', event)">Login</div>
             </div>
 
-
-            <!-- REGISTER FORM PANEL -->
+            <!-- REGISTRATION MODE -->
             <div id="panel-register" class="auth-form-panel active">
-                <h2>Create an Account</h2>
-                <p>Pick a profile name and username to start chatting instantly!</p>
+                <h2>Join CherryChat 🍒</h2>
+                <p>One dream app. Discord layout, Snapchat filters, TikTok feeds.</p>
                 <div class="input-group">
                     <label>Your Name</label>
                     <input type="text" id="reg-name" placeholder="John Doe">
@@ -29,13 +28,13 @@
                     <label>Username</label>
                     <input type="text" id="reg-user" placeholder="johndoe123">
                 </div>
-                <button onclick="handleProfileSubmit()">BAM! Launch Desktop</button>
+                <button onclick="handleProfileSubmit()">BAM! Launch App</button>
             </div>
 
-            <!-- LOGIN FORM PANEL -->
+            <!-- LOGIN MODE -->
             <div id="panel-login" class="auth-form-panel">
                 <h2>Welcome Back!</h2>
-                <p>Enter your existing unique username to sign back in.</p>
+                <p>Sign back into your profile directory instantly.</p>
                 <div class="input-group">
                     <label>Username</label>
                     <input type="text" id="login-user" placeholder="johndoe123">
@@ -45,44 +44,56 @@
         </div>
     </div>
 
-    <!-- MAIN DESKTOP INTERFACE WRAPPER -->
+    <!-- MAIN APP STRUCTURE -->
     <div class="desktop-wrapper">
         
-        <!-- COLUMN 1: Server Icons Strip -->
+        <!-- COLUMN 1: System Module Icons Sidebar Navigation -->
         <div class="sidebar-servers">
-            <div class="server-icon active" onclick="switchNavContext('chats')" title="Direct Messages">💬</div>
-            <div class="server-icon" onclick="switchNavContext('servers')" title="Servers Hub">🌐</div>
+            <div class="server-icon active" id="nav-icon-chats" onclick="switchNavContext('chats')" title="Direct Messaging (WhatsApp Style)">💬</div>
+            <div class="server-icon" id="nav-icon-servers" onclick="switchNavContext('servers')" title="Group Chat Servers (Discord Style)">🌐</div>
+            <div class="server-icon" id="nav-icon-tiktok" onclick="switchNavContext('tiktok')" title="TikTok Reels Video Feed">🔥</div>
             <div style="width: 32px; height: 2px; background: #35373c; margin: 4px 0;"></div>
-            <div class="server-icon" style="color:var(--discord-online)" onclick="switchNavContext('actions')" title="Add Friends / Actions">➕</div>
+            <div class="server-icon" style="color:var(--cherry-main);" onclick="switchNavContext('actions')" title="Add Friends Control Panel">➕</div>
         </div>
 
-        <!-- COLUMN 2: Navigation Item Drawer -->
+        <!-- COLUMN 2: Interactive Context Submenu Drawer Lists -->
         <div class="sidebar-lists">
             <div class="sidebar-header">
-                <span id="display-username">@username</span>
-                <span style="font-size:12px; color:var(--discord-text-muted); cursor:pointer;" onclick="logout()">Log Out</span>
+                <div class="profile-meta">
+                    <div class="row-avatar" id="my-avatar" style="width:28px; height:28px; font-size:10px;">ME</div>
+                    <span id="display-username">@username</span>
+                    <div class="status-dot online" id="my-status-indicator"></div>
+                </div>
+                <select class="status-selector" id="status-picker" onchange="updateMyStatus()">
+                    <option value="online">🟢 Online</option>
+                    <option value="idle">🌙 Idle</option>
+                    <option value="dnd">⛔ DND</option>
+                </select>
             </div>
             <div class="list-container" id="middle-sidebar-content">
-                <!-- Dynamically filled via JavaScript -->
+                <!-- Injected via app.js Dynamic Rendering Engine -->
+            </div>
+            <div style="padding:10px; text-align:center; font-size:11px; background:rgba(0,0,0,0.2); color:var(--discord-text-muted); cursor:pointer;" onclick="logout()">
+                🚪 Exit Account
             </div>
         </div>
 
-        <!-- COLUMN 3: Large Workspace/Chat Engine -->
+        <!-- COLUMN 3: Central Workspace Panel -->
         <div class="main-chat-panel">
             <div class="chat-header">
-                <h3 id="chat-title">Select a Conversation Channel</h3>
+                <h3 id="chat-title">Select a CherryChat Hub Channel</h3>
                 <div id="chat-streak-status" class="streak-badge"></div>
             </div>
             
-            <div class="chat-view" style="flex:1; display:flex; flex-direction:column;">
+            <div class="chat-view" id="workspace-view-container" style="flex:1; display:flex; flex-direction:column;">
                 <div class="chat-messages" id="chat-messages-container">
-                    <p style="color:var(--discord-text-muted); text-align:center; margin-top:40px;">Select a teammate or server channel from the sidebar layout to begin messaging.</p>
+                    <p style="color:var(--discord-text-muted); text-align:center; margin-top:60px; font-size:15px;">Welcome to CherryChat! Click on a sidebar item to activate the modules feed layout streams.</p>
                 </div>
                 
                 <div class="chat-input-area" id="chat-input-container" style="display:none;">
                     <div class="chat-input-wrapper">
-                        <button class="icon-btn" onclick="openCamera()">📷</button>
-                        <input type="text" id="chat-inline-input" placeholder="Message channel...">
+                        <button class="icon-btn" onclick="openCamera()" title="Snapchat Camera Filters">📷</button>
+                        <input type="text" id="chat-inline-input" placeholder="Send a unified secure message...">
                         <button class="icon-btn" onclick="sendTextMessage()">➔</button>
                     </div>
                 </div>
@@ -91,18 +102,19 @@
 
     </div>
 
-    <!-- LIVE CAMERA SYSTEM -->
+    <!-- SNAPCHAT CAMERA FILTER OVERLAY MODAL -->
     <div id="camera-modal" class="camera-modal">
         <video id="camera-stream" autoplay playsinline></video>
         <div class="filter-bar">
-            <div class="filter-thumb" onclick="applyFilter('filter-normal')">Normal</div>
-            <div class="filter-thumb" onclick="applyFilter('filter-vintage')">Vintage</div>
-            <div class="filter-thumb" onclick="applyFilter('filter-neon')">Neon</div>
-            <div class="filter-thumb" onclick="applyFilter('filter-bw')">B&W</div>
+            <div class="filter-thumb active" id="f-normal" onclick="selectFilter('filter-normal')">Normal</div>
+            <div class="filter-thumb" id="f-vintage" onclick="selectFilter('filter-vintage')">Vintage</div>
+            <div class="filter-thumb" id="f-neon" onclick="selectFilter('filter-neon')">Neon Lenses</div>
+            <div class="filter-thumb" id="f-bw" onclick="selectFilter('filter-bw')">B&W Dramatic</div>
+            <div class="filter-thumb" id="f-anime" onclick="selectFilter('filter-anime')">Anime Shaper</div>
         </div>
-        <div style="padding: 20px; display: flex; justify-content: center; gap: 20px; background: #000;">
-            <button class="action-btn" onclick="closeCamera()" style="background: #333; padding:10px 20px; color:white; border:none; border-radius:4px; cursor:pointer;">Cancel</button>
-            <button class="action-btn" onclick="captureAndSendPhoto()" style="background: var(--discord-online); padding:10px 20px; color:white; border:none; border-radius:4px; cursor:pointer;">Snap & Send</button>
+        <div style="padding: 24px; display: flex; justify-content: center; gap: 24px; background: #111;">
+            <button onclick="closeCamera()" style="background: #333; padding:12px 24px; max-width:140px;">Cancel</button>
+            <button onclick="captureAndSendPhoto()" style="background: var(--cherry-main); padding:12px 24px; max-width:180px;">Snap & Post</button>
         </div>
     </div>
 
