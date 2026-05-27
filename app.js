@@ -271,3 +271,5 @@ function captureAndSendPhoto() {
 }
 
 if(store.getCurrentUser()) { navigateTo('screen-main'); }
+
+
