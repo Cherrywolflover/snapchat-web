@@ -8,13 +8,14 @@
 </head>
 <body>
 
-    <!-- DISCORD REGISTRATION & LOGIN WALL -->
+       <!-- DISCORD REGISTRATION & LOGIN WALL -->
     <div id="auth-wall" class="screen-auth">
         <div class="auth-container">
             <div class="auth-tabs">
-                <div class="auth-tab active" id="tab-btn-register" onclick="switchAuthTab('register')">Register</div>
-                <div class="auth-tab" id="tab-btn-login" onclick="switchAuthTab('login')">Login</div>
+                <div class="auth-tab active" id="tab-btn-register" onclick="switchAuthTab('register', event)">Register</div>
+                <div class="auth-tab" id="tab-btn-login" onclick="switchAuthTab('login', event)">Login</div>
             </div>
+
 
             <!-- REGISTER FORM PANEL -->
             <div id="panel-register" class="auth-form-panel active">
