@@ -180,6 +180,8 @@ document.getElementById("themeSelect").addEventListener("change", (e) => {
 });
 
 // ============== NAVIGATION ==============
+let currentChatForCamera = null;
+
 function setupAppListeners() {
   document.querySelectorAll(".nav-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -205,36 +207,9 @@ function setupAppListeners() {
 let selectedChat = null;
 
 const botReplies = {
-  cherry: [
-    "omg yes!! 💕",
-    "wait fr fr??",
-    "soooo cute 🥺",
-    "literally obsessed",
-    "no cuz same tho",
-    "periodt ✨",
-    "the way i—",
-    "no cap 🔥"
-  ],
-  luna: [
-    "fr tho 🌙",
-    "that's so real",
-    "no but seriously",
-    "i felt that",
-    "facts facts",
-    "lowkey tho",
-    "bet bet",
-    "all that and more"
-  ],
-  sage: [
-    "vibes only ✨",
-    "that hits different",
-    "respect that energy",
-    "understood the assignment",
-    "no notes 🍃",
-    "felt in my soul",
-    "that's the one",
-    "keeping it real"
-  ]
+  cherry: ["omg yes!! 💕", "wait fr fr??", "soooo cute 🥺", "literally obsessed", "no cuz same tho", "periodt ✨", "the way i—", "no cap 🔥"],
+  luna: ["fr tho 🌙", "that's so real", "no but seriously", "i felt that", "facts facts", "lowkey tho", "bet bet", "all that and more"],
+  sage: ["vibes only ✨", "that hits different", "respect that energy", "understood the assignment", "no notes 🍃", "felt in my soul", "that's the one", "keeping it real"]
 };
 
 function renderChats() {
@@ -268,6 +243,7 @@ function renderChats() {
 
 function openChat(chat, otherUser) {
   selectedChat = chat;
+  currentChatForCamera = { chat, otherUser };
   renderChats();
   renderChatModal(chat.id, otherUser);
   document.getElementById("chatModal").classList.remove("hidden");
@@ -307,50 +283,74 @@ document.getElementById("closeChat").addEventListener("click", () => {
   selectedChat = null;
 });
 
-document.getElementById("sendMessageBtn").addEventListener("click", () => {
-  if (!selectedChat) return;
-  const input = document.getElementById("messageInput");
+function sendMessage(inputId, isCameraChat = false) {
+  const input = document.getElementById(inputId);
   const text = input.value.trim();
   if (!text) return;
 
-  if (!state.messages[selectedChat.id]) state.messages[selectedChat.id] = [];
+  let chat = selectedChat || currentChatForCamera?.chat;
+  if (!chat) return alert("No chat selected");
+
+  if (!state.messages[chat.id]) state.messages[chat.id] = [];
   
-  state.messages[selectedChat.id].push({
+  state.messages[chat.id].push({
     from: state.currentUser,
     text,
     time: Date.now()
   });
 
-  selectedChat.lastMessage = text;
-  selectedChat.lastTime = Date.now();
+  chat.lastMessage = text;
+  chat.lastTime = Date.now();
   input.value = "";
   saveState();
   
-  const other = selectedChat.participants.find(p => p !== state.currentUser);
-  renderChatModal(selectedChat.id, other);
+  const otherUser = isCameraChat ? currentChatForCamera.otherUser : selectedChat.participants.find(p => p !== state.currentUser);
+  
+  if (!isCameraChat) {
+    renderChatModal(chat.id, otherUser);
+  } else {
+    renderCameraChatPanel(chat.id, otherUser);
+  }
   renderChats();
 
-  // BOT REPLY (random delay 1-2 seconds)
+  // Bot reply
   setTimeout(() => {
-    const replies = botReplies[other] || botReplies.cherry;
+    const replies = botReplies[otherUser] || botReplies.cherry;
     const reply = replies[Math.floor(Math.random() * replies.length)];
     
-    state.messages[selectedChat.id].push({
-      from: other,
+    state.messages[chat.id].push({
+      from: otherUser,
       text: reply,
       time: Date.now()
     });
     
-    selectedChat.lastMessage = reply;
-    selectedChat.lastTime = Date.now();
+    chat.lastMessage = reply;
+    chat.lastTime = Date.now();
     saveState();
-    renderChatModal(selectedChat.id, other);
+    
+    if (!isCameraChat) {
+      renderChatModal(chat.id, otherUser);
+    } else {
+      renderCameraChatPanel(chat.id, otherUser);
+    }
     renderChats();
   }, 800 + Math.random() * 1200);
+}
+
+document.getElementById("sendMessageBtn").addEventListener("click", () => {
+  sendMessage("messageInput", false);
+});
+
+document.getElementById("cameraSendBtn").addEventListener("click", () => {
+  sendMessage("cameraMsgInput", true);
 });
 
 document.getElementById("messageInput").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") document.getElementById("sendMessageBtn").click();
+  if (e.key === "Enter") sendMessage("messageInput", false);
+});
+
+document.getElementById("cameraMsgInput").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage("cameraMsgInput", true);
 });
 
 document.getElementById("newChatBtn").addEventListener("click", () => {
@@ -380,6 +380,36 @@ document.getElementById("newChatBtn").addEventListener("click", () => {
     renderChats();
   }
 });
+
+// ============== CAMERA CHAT PANEL ==============
+function renderCameraChatPanel(chatId, otherUser) {
+  const user = state.users[otherUser];
+  const initial = user.displayName[0].toUpperCase();
+  const messages = state.messages[chatId] || [];
+  const streak = state.streaks[chatId] || 0;
+
+  document.getElementById("cameraChatAvatar").innerHTML = `<div style="background: linear-gradient(135deg, #ffc7e3, #ff4b9a); width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">${initial}</div>`;
+  document.getElementById("cameraChatName").textContent = user.displayName;
+  document.getElementById("cameraChatStatus").textContent = user.status + " • " + (user.mood || "neutral");
+  document.getElementById("cameraStreakCount").textContent = streak;
+
+  const feed = document.getElementById("cameraMessagesFeed");
+  feed.innerHTML = "";
+
+  messages.forEach(msg => {
+    const div = document.createElement("div");
+    if (msg.isSnap) {
+      div.className = `message snap ${msg.from === state.currentUser ? "sent" : "received"}`;
+      div.innerHTML = `<img src="${msg.text}" alt="snap">`;
+    } else {
+      div.className = `message ${msg.from === state.currentUser ? "sent" : "received"}`;
+      div.textContent = msg.text;
+    }
+    feed.appendChild(div);
+  });
+
+  feed.scrollTop = feed.scrollHeight;
+}
 
 // ============== CAMERA & FILTERS ==============
 let currentFilter = "neon";
@@ -503,7 +533,6 @@ async function setupCamera() {
     }
   } catch (e) {
     console.error("Camera error", e);
-    alert("Camera access needed for snaps!");
   }
 }
 
@@ -532,44 +561,47 @@ function captureSnap() {
 }
 
 document.getElementById("snapToChat").addEventListener("click", () => {
-  if (!selectedChat) {
-    alert("Open a chat first!");
+  if (!currentChatForCamera) {
+    alert("Select a chat first from the left!");
     return;
   }
-  const snap = captureSnap();
-  if (!state.messages[selectedChat.id]) state.messages[selectedChat.id] = [];
   
-  state.messages[selectedChat.id].push({
+  const snap = captureSnap();
+  const chat = currentChatForCamera.chat;
+  const otherUser = currentChatForCamera.otherUser;
+  
+  if (!state.messages[chat.id]) state.messages[chat.id] = [];
+  
+  state.messages[chat.id].push({
     from: state.currentUser,
     text: snap,
     time: Date.now(),
     isSnap: true
   });
 
-  selectedChat.lastMessage = "📸 Snap";
-  selectedChat.lastTime = Date.now();
+  chat.lastMessage = "📸 Snap";
+  chat.lastTime = Date.now();
   saveState();
   
-  const other = selectedChat.participants.find(p => p !== state.currentUser);
-  renderChatModal(selectedChat.id, other);
+  renderCameraChatPanel(chat.id, otherUser);
   renderChats();
-  updateStreak(selectedChat.id);
+  updateStreak(chat.id);
   
-  // Bot replies with snap back
+  // Bot replies with snap
   setTimeout(() => {
     if (Math.random() > 0.3) {
       const botSnap = captureSnap();
-      state.messages[selectedChat.id].push({
-        from: other,
+      state.messages[chat.id].push({
+        from: otherUser,
         text: botSnap,
         time: Date.now(),
         isSnap: true
       });
-      selectedChat.lastMessage = "📸 Snap";
+      chat.lastMessage = "📸 Snap";
       saveState();
-      renderChatModal(selectedChat.id, other);
+      renderCameraChatPanel(chat.id, otherUser);
       renderChats();
-      updateStreak(selectedChat.id);
+      updateStreak(chat.id);
     }
   }, 800 + Math.random() * 1200);
 });
