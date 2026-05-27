@@ -1,123 +1,145 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CherryChat Hybrid Desktop</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CherryChat</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- AUTH -->
+  <div id="auth" class="overlay">
+    <div class="card auth-card">
+      <header class="card-head">
+        <div class="brand"><span class="logo-dot"></span> CherryChat</div>
+        <nav class="tabs">
+          <button class="tab active" data-panel="login">Login</button>
+          <button class="tab" data-panel="register">Register</button>
+        </nav>
+      </header>
 
-    <!-- CHERRYCHAT AUTHENTICATION GATE -->
-    <div id="auth-wall" class="screen-auth">
-        <div class="auth-container">
-            <div class="auth-tabs">
-                <div class="auth-tab active" id="tab-btn-register" onclick="switchAuthTab('register', event)">Register</div>
-                <div class="auth-tab" id="tab-btn-login" onclick="switchAuthTab('login', event)">Login</div>
-            </div>
+      <main class="card-body">
+        <section id="panel-login" class="panel active">
+          <label>Username<input id="login-username" /></label>
+          <label>Password<input id="login-password" type="password" /></label>
+          <button id="btn-login" class="btn primary">Enter</button>
+        </section>
 
-            <!-- REGISTRATION MODE -->
-            <div id="panel-register" class="auth-form-panel active">
-                <h2>Join CherryChat 🍒</h2>
-                <p>One dream app. Discord layout, Snapchat filters, TikTok feeds.</p>
-                <div class="input-group">
-                    <label>Your Name</label>
-                    <input type="text" id="reg-name" placeholder="John Doe">
-                </div>
-                <div class="input-group">
-                    <label>Username</label>
-                    <input type="text" id="reg-user" placeholder="johndoe123">
-                </div>
-                <button onclick="handleProfileSubmit()">BAM! Launch App</button>
-            </div>
+        <section id="panel-register" class="panel">
+          <label>Username<input id="reg-username" /></label>
+          <label>Display name<input id="reg-display" /></label>
+          <label>Password<input id="reg-password" type="password" /></label>
+          <label>Bio<input id="reg-bio" maxlength="120" /></label>
+          <button id="btn-register" class="btn primary">Create</button>
+        </section>
+      </main>
 
-            <!-- LOGIN MODE -->
-            <div id="panel-login" class="auth-form-panel">
-                <h2>Welcome Back!</h2>
-                <p>Sign back into your profile directory instantly.</p>
-                <div class="input-group">
-                    <label>Username</label>
-                    <input type="text" id="login-user" placeholder="johndoe123">
-                </div>
-                <button onclick="handleLoginSubmit()">BAM! Sign In</button>
-            </div>
-        </div>
+      <footer class="card-foot">
+        <small>Local-first demo • Profiles saved to localStorage</small>
+      </footer>
     </div>
+  </div>
 
-    <!-- MAIN APP STRUCTURE -->
-    <div class="desktop-wrapper">
-        
-        <!-- COLUMN 1: System Module Icons Sidebar Navigation -->
-        <div class="sidebar-servers">
-            <div class="server-icon active" id="nav-icon-chats" onclick="switchNavContext('chats')" title="Direct Messaging (WhatsApp Style)">💬</div>
-            <div class="server-icon" id="nav-icon-servers" onclick="switchNavContext('servers')" title="Group Chat Servers (Discord Style)">🌐</div>
-            <div class="server-icon" id="nav-icon-tiktok" onclick="switchNavContext('tiktok')" title="TikTok Reels Video Feed">🔥</div>
-            <div style="width: 32px; height: 2px; background: #35373c; margin: 4px 0;"></div>
-            <div class="server-icon" style="color:var(--cherry-main);" onclick="switchNavContext('actions')" title="Add Friends Control Panel">➕</div>
+  <!-- APP -->
+  <div id="app" class="app-root" hidden>
+    <aside class="col servers">
+      <div class="server-logo">CC</div>
+      <div id="servers" class="stack"></div>
+      <button id="add-server" class="icon-btn">＋</button>
+    </aside>
+
+    <aside class="col channels">
+      <div class="server-info">
+        <h3 id="server-name">Cherry Lounge</h3>
+        <p id="server-desc">Cozy chaos</p>
+      </div>
+      <div id="channel-list" class="list"></div>
+      <div class="profile-bar">
+        <div id="profile-avatar" class="avatar">C</div>
+        <div class="meta">
+          <div id="profile-name">Cherry</div>
+          <div id="profile-status" class="status-pill"><span id="status-dot" class="dot online"></span><span id="status-text">Online</span></div>
         </div>
-
-        <!-- COLUMN 2: Interactive Context Submenu Drawer Lists -->
-        <div class="sidebar-lists">
-            <div class="sidebar-header">
-                <div class="profile-meta">
-                    <div class="row-avatar" id="my-avatar" style="width:28px; height:28px; font-size:10px;">ME</div>
-                    <span id="display-username">@username</span>
-                    <div class="status-dot online" id="my-status-indicator"></div>
-                </div>
-                <select class="status-selector" id="status-picker" onchange="updateMyStatus()">
-                    <option value="online">🟢 Online</option>
-                    <option value="idle">🌙 Idle</option>
-                    <option value="dnd">⛔ DND</option>
-                </select>
-            </div>
-            <div class="list-container" id="middle-sidebar-content">
-                <!-- Injected via app.js Dynamic Rendering Engine -->
-            </div>
-            <div style="padding:10px; text-align:center; font-size:11px; background:rgba(0,0,0,0.2); color:var(--discord-text-muted); cursor:pointer;" onclick="logout()">
-                🚪 Exit Account
-            </div>
+        <div class="actions">
+          <button id="btn-profile" class="icon-btn">☺</button>
+          <button id="btn-logout" class="icon-btn">⎋</button>
         </div>
+      </div>
+    </aside>
 
-        <!-- COLUMN 3: Central Workspace Panel -->
-        <div class="main-chat-panel">
-            <div class="chat-header">
-                <h3 id="chat-title">Select a CherryChat Hub Channel</h3>
-                <div id="chat-streak-status" class="streak-badge"></div>
+    <main class="col center">
+      <header class="center-head">
+        <div class="channel-title"><span>#</span><strong id="channel-name">general</strong></div>
+        <div class="head-stats">
+          <div>Streaks <span id="streak-count">0</span></div>
+          <div>DMs <span id="dm-count">0</span></div>
+        </div>
+      </header>
+
+      <section class="center-body">
+        <div id="chat-feed" class="chat-feed" aria-live="polite"></div>
+
+        <div class="media-row">
+          <section class="snap-panel">
+            <div class="panel-head">
+              <strong>Snap Matrix</strong>
+              <small>Live webcam + filters</small>
             </div>
-            
-            <div class="chat-view" id="workspace-view-container" style="flex:1; display:flex; flex-direction:column;">
-                <div class="chat-messages" id="chat-messages-container">
-                    <p style="color:var(--discord-text-muted); text-align:center; margin-top:60px; font-size:15px;">Welcome to CherryChat! Click on a sidebar item to activate the modules feed layout streams.</p>
-                </div>
-                
-                <div class="chat-input-area" id="chat-input-container" style="display:none;">
-                    <div class="chat-input-wrapper">
-                        <button class="icon-btn" onclick="openCamera()" title="Snapchat Camera Filters">📷</button>
-                        <input type="text" id="chat-inline-input" placeholder="Send a unified secure message...">
-                        <button class="icon-btn" onclick="sendTextMessage()">➔</button>
-                    </div>
-                </div>
+            <div class="video-wrap">
+              <video id="cam" autoplay playsinline muted></video>
+              <canvas id="snap-canvas" aria-hidden="true"></canvas>
+              <div class="filter-tag">Filter: <span id="filter-label">Neon</span></div>
             </div>
-        </div>
 
-    </div>
+            <div class="filter-controls">
+              <div class="filters">
+                <button class="filter-btn active" data-filter="neon">Neon</button>
+                <button class="filter-btn" data-filter="vintage">Vintage</button>
+                <button class="filter-btn" data-filter="bw">B&amp;W</button>
+                <button class="filter-btn" data-filter="grain">Film</button>
+                <button class="filter-btn" data-filter="edge">Edge</button>
+              </div>
+              <div class="snap-actions">
+                <button id="btn-snap" class="btn primary">Snap to chat</button>
+              </div>
+            </div>
+          </section>
 
-    <!-- SNAPCHAT CAMERA FILTER OVERLAY MODAL -->
-    <div id="camera-modal" class="camera-modal">
-        <video id="camera-stream" autoplay playsinline></video>
-        <div class="filter-bar">
-            <div class="filter-thumb active" id="f-normal" onclick="selectFilter('filter-normal')">Normal</div>
-            <div class="filter-thumb" id="f-vintage" onclick="selectFilter('filter-vintage')">Vintage</div>
-            <div class="filter-thumb" id="f-neon" onclick="selectFilter('filter-neon')">Neon Lenses</div>
-            <div class="filter-thumb" id="f-bw" onclick="selectFilter('filter-bw')">B&W Dramatic</div>
-            <div class="filter-thumb" id="f-anime" onclick="selectFilter('filter-anime')">Anime Shaper</div>
+          <section class="tiktok-panel">
+            <div class="panel-head">
+              <strong>Vertical Scroll</strong>
+              <small>TikTok-style feed</small>
+            </div>
+            <div id="tiktok-feed" class="tiktok-feed"></div>
+          </section>
         </div>
-        <div style="padding: 24px; display: flex; justify-content: center; gap: 24px; background: #111;">
-            <button onclick="closeCamera()" style="background: #333; padding:12px 24px; max-width:140px;">Cancel</button>
-            <button onclick="captureAndSendPhoto()" style="background: var(--cherry-main); padding:12px 24px; max-width:180px;">Snap & Post</button>
-        </div>
-    </div>
+      </section>
 
-    <script src="app.js"></script>
+      <footer class="chat-input">
+        <input id="msg-input" placeholder="Send a message..." />
+        <button id="btn-send" class="btn primary">Send</button>
+      </footer>
+    </main>
+
+    <aside class="col right">
+      <header class="right-head">
+        <strong>Presence</strong>
+        <span id="online-count">0</span> online
+      </header>
+
+      <div id="user-list" class="list users"></div>
+
+      <section class="friend-requests">
+        <h4>Friend requests</h4>
+        <div id="requests" class="list"></div>
+      </section>
+    </aside>
+  </div>
+
+  <audio id="ping" preload="auto">
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav">
+  </audio>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>
