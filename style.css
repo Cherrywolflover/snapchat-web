@@ -58,190 +58,158 @@ body {
   color: var(--text);
   min-height: 100vh;
   transition: background 0.25s ease, color 0.25s ease;
+  display: flex;
 }
 
 /* ---------------------------------------------------
-   AUTH SCREEN
+   SIDEBAR
 --------------------------------------------------- */
-.auth-overlay {
-  position: fixed;
-  inset: 0;
+.sidebar {
+  width: 220px;
+  background: var(--card);
+  border-right: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 20px;
+}
+
+.sidebar-top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at top, rgba(255,199,227,0.4), transparent 60%);
-}
-
-.auth-card {
-  width: 360px;
-  background: var(--card);
-  border-radius: 24px;
-  padding: 20px;
-  box-shadow: var(--shadow-soft);
-  border: 1px solid var(--border-soft);
-}
-
-.brand {
-  font-size: 22px;
-  font-weight: 800;
-  margin-bottom: 10px;
-}
-
-.auth-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-
-.auth-tab {
-  flex: 1;
-  border-radius: 999px;
-  border: 0;
-  padding: 8px 0;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.auth-tab.active {
-  background: var(--bg-soft);
-  color: var(--text);
-}
-
-.auth-panel {
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.auth-panel.active {
-  display: flex;
-}
-
-.auth-panel label {
-  font-size: 13px;
-  color: var(--muted);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.auth-panel input {
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  padding: 8px 12px;
-  background: #fff;
-  color: var(--text);
-}
-
-.auth-note {
-  margin-top: 10px;
-  font-size: 11px;
-  color: var(--muted);
-  text-align: center;
-}
-
-/* ---------------------------------------------------
-   APP SHELL
---------------------------------------------------- */
-.app-root {
-  width: 100%;
-  max-width: 1100px;
-  margin: 16px auto;
-  border-radius: 26px;
-  background: var(--card);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid var(--border-soft);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* ---------------------------------------------------
-   TOP BAR
---------------------------------------------------- */
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border-soft);
-  background: linear-gradient(90deg, var(--bg-soft), transparent);
+  gap: 10px;
 }
 
 .logo-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 14px;
+  height: 14px;
   background: var(--accent-strong);
+  border-radius: 50%;
   box-shadow: 0 0 10px var(--accent-strong);
-  margin-right: 6px;
 }
 
-.nav-tab {
-  border-radius: 999px;
+.sidebar-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.side-btn {
+  padding: 10px 14px;
+  border-radius: 12px;
   border: 0;
-  padding: 6px 14px;
-  background: transparent;
-  color: var(--muted);
+  background: var(--bg-soft);
   cursor: pointer;
+  font-size: 14px;
+  text-align: left;
 }
 
-.nav-tab.active {
-  background: var(--bg-soft);
-  color: var(--text);
+.side-btn.active {
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  color: #fff;
   font-weight: 600;
 }
 
+.sidebar-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .theme-select {
+  padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  padding: 4px 10px;
   background: var(--card);
+}
+
+/* ---------------------------------------------------
+   MAIN VIEW
+--------------------------------------------------- */
+.main-view {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+}
+
+/* ---------------------------------------------------
+   CAMERA FIX (filters working)
+--------------------------------------------------- */
+.camera-frame {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #000;
+}
+
+#cam {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+#snap-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 2;
+  display: block;
+}
+
+.filter-label {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0,0,0,0.5);
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: #fff;
   font-size: 12px;
 }
 
 /* ---------------------------------------------------
-   VIEWS
+   FILTER BUTTONS
 --------------------------------------------------- */
-.view-root {
+.filter-row {
   display: flex;
-  flex: 1;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.view {
-  display: none;
-  width: 100%;
+.filter-btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-soft);
+  cursor: pointer;
+  font-size: 12px;
 }
 
-.view.active {
-  display: flex;
+.filter-btn.active {
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  color: #fff;
 }
 
 /* ---------------------------------------------------
-   CHATS VIEW
+   CHAT VIEW
 --------------------------------------------------- */
 .chats-list {
-  width: 32%;
+  width: 260px;
   border-right: 1px solid var(--border-soft);
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.chat-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 14px;
-  cursor: pointer;
-}
-
-.chat-item:hover,
-.chat-item.active {
-  background: var(--bg-soft);
+  padding-right: 20px;
 }
 
 .chat-main {
@@ -252,19 +220,18 @@ body {
 
 .chat-feed {
   flex: 1;
-  padding: 10px 12px;
   overflow: auto;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  background: radial-gradient(circle at top, var(--bg-soft), transparent 60%);
+  gap: 10px;
 }
 
 .msg {
   max-width: 70%;
-  padding: 8px 10px;
+  padding: 10px 14px;
   border-radius: 16px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .msg.me {
@@ -278,66 +245,24 @@ body {
   background: var(--bg-soft);
 }
 
-.msg img {
-  max-width: 220px;
-  border-radius: 14px;
-  margin-top: 6px;
-}
-
 /* ---------------------------------------------------
-   CAMERA / SNAPS VIEW
---------------------------------------------------- */
-.camera-frame {
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;
-  background: #000;
-  height: 260px;
-}
-
-.filter-row {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.filter-btn {
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  padding: 4px 10px;
-  background: transparent;
-  font-size: 12px;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.filter-btn.active {
-  background: var(--bg-soft);
-  color: var(--text);
-}
-
-/* ---------------------------------------------------
-   PROFILE VIEW
+   PROFILE
 --------------------------------------------------- */
 .profile-avatar-wrap {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
 }
 
 .avatar {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background: var(--bg-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-}
-
-.avatar.large {
-  width: 80px;
-  height: 80px;
-  font-size: 26px;
 }
 
 .story-ring {
@@ -355,7 +280,7 @@ body {
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 6px;
+  gap: 10px;
 }
 
 .gallery-grid img {
@@ -368,17 +293,20 @@ body {
    BUTTONS
 --------------------------------------------------- */
 .btn {
+  padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  padding: 6px 12px;
   background: var(--bg-soft);
   cursor: pointer;
-  font-size: 12px;
 }
 
 .btn.primary {
   background: linear-gradient(90deg, var(--accent), var(--accent-strong));
-  border: 0;
   color: #fff;
-  font-weight: 600;
+  border: 0;
+}
+
+.btn.small {
+  padding: 6px 10px;
+  font-size: 12px;
 }
