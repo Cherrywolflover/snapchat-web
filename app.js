@@ -69,6 +69,12 @@ function seedDemoData() {
     lastMessage: "u on?",
     lastTime: Date.now()
   };
+  state.chats["demo-sage"] = {
+    id: "demo-sage",
+    participants: ["demo", "sage"],
+    lastMessage: "vibing",
+    lastTime: Date.now()
+  };
 
   // Sample messages
   state.messages["demo-cherry"] = [
@@ -79,10 +85,14 @@ function seedDemoData() {
   state.messages["demo-luna"] = [
     { from: "luna", text: "u on?", time: Date.now() }
   ];
+  state.messages["demo-sage"] = [
+    { from: "sage", text: "vibing", time: Date.now() }
+  ];
 
   // Streaks
   state.streaks["demo-cherry"] = 7;
   state.streaks["demo-luna"] = 3;
+  state.streaks["demo-sage"] = 1;
 }
 
 // ============== AUTH ==============
@@ -194,6 +204,39 @@ function setupAppListeners() {
 // ============== CHATS ==============
 let selectedChat = null;
 
+const botReplies = {
+  cherry: [
+    "omg yes!! 💕",
+    "wait fr fr??",
+    "soooo cute 🥺",
+    "literally obsessed",
+    "no cuz same tho",
+    "periodt ✨",
+    "the way i—",
+    "no cap 🔥"
+  ],
+  luna: [
+    "fr tho 🌙",
+    "that's so real",
+    "no but seriously",
+    "i felt that",
+    "facts facts",
+    "lowkey tho",
+    "bet bet",
+    "all that and more"
+  ],
+  sage: [
+    "vibes only ✨",
+    "that hits different",
+    "respect that energy",
+    "understood the assignment",
+    "no notes 🍃",
+    "felt in my soul",
+    "that's the one",
+    "keeping it real"
+  ]
+};
+
 function renderChats() {
   const list = document.getElementById("chatsList");
   list.innerHTML = "";
@@ -286,6 +329,24 @@ document.getElementById("sendMessageBtn").addEventListener("click", () => {
   const other = selectedChat.participants.find(p => p !== state.currentUser);
   renderChatModal(selectedChat.id, other);
   renderChats();
+
+  // BOT REPLY (random delay 1-2 seconds)
+  setTimeout(() => {
+    const replies = botReplies[other] || botReplies.cherry;
+    const reply = replies[Math.floor(Math.random() * replies.length)];
+    
+    state.messages[selectedChat.id].push({
+      from: other,
+      text: reply,
+      time: Date.now()
+    });
+    
+    selectedChat.lastMessage = reply;
+    selectedChat.lastTime = Date.now();
+    saveState();
+    renderChatModal(selectedChat.id, other);
+    renderChats();
+  }, 800 + Math.random() * 1200);
 });
 
 document.getElementById("messageInput").addEventListener("keypress", (e) => {
@@ -329,9 +390,9 @@ const filters = {
     const id = ctx.getImageData(0, 0, w, h);
     const d = id.data;
     for (let i = 0; i < d.length; i += 4) {
-      d[i] = Math.min(255, d[i] * 1.3);
-      d[i+1] = Math.min(255, d[i+1] * 0.8);
-      d[i+2] = Math.min(255, d[i+2] * 1.2);
+      d[i] = Math.min(255, d[i] * 1.4);
+      d[i+1] = Math.min(255, d[i+1] * 0.6);
+      d[i+2] = Math.min(255, d[i+2] * 1.3);
     }
     ctx.putImageData(id, 0, 0);
   },
@@ -339,10 +400,10 @@ const filters = {
     const id = ctx.getImageData(0, 0, w, h);
     const d = id.data;
     for (let i = 0; i < d.length; i += 4) {
-      const avg = (d[i] + d[i+1] + d[i+2]) * 0.3;
-      d[i] = Math.min(255, avg + 40);
-      d[i+1] = Math.min(255, avg + 10);
-      d[i+2] = Math.max(0, avg * 0.8);
+      const avg = (d[i] + d[i+1] + d[i+2]) / 3;
+      d[i] = Math.min(255, avg + 50);
+      d[i+1] = Math.min(255, avg + 20);
+      d[i+2] = Math.max(0, avg - 30);
     }
     ctx.putImageData(id, 0, 0);
   },
@@ -350,7 +411,7 @@ const filters = {
     const id = ctx.getImageData(0, 0, w, h);
     const d = id.data;
     for (let i = 0; i < d.length; i += 4) {
-      const gray = d[i] * 0.3 + d[i+1] * 0.59 + d[i+2] * 0.11;
+      const gray = d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114;
       d[i] = d[i+1] = d[i+2] = gray;
     }
     ctx.putImageData(id, 0, 0);
@@ -359,10 +420,10 @@ const filters = {
     const id = ctx.getImageData(0, 0, w, h);
     const d = id.data;
     for (let i = 0; i < d.length; i += 4) {
-      d[i] = Math.max(0, d[i] - 30);
-      d[i+1] = Math.max(0, d[i+1] - 20);
-      d[i+2] = Math.max(0, d[i+2] - 10);
-      if (Math.random() < 0.01) d[i+3] *= Math.random();
+      d[i] = Math.max(0, d[i] - 40);
+      d[i+1] = Math.max(0, d[i+1] - 30);
+      d[i+2] = Math.max(0, d[i+2] - 20);
+      if (Math.random() < 0.02) d[i+3] *= 0.7;
     }
     ctx.putImageData(id, 0, 0);
   },
@@ -370,15 +431,14 @@ const filters = {
     const id = ctx.getImageData(0, 0, w, h);
     const d = id.data;
     const temp = new Uint8ClampedArray(d);
-    for (let i = 0; i < d.length; i += 4) {
+    for (let i = 4; i < d.length - 4; i += 4) {
       const idx = i / 4;
       const x = idx % w;
-      const y = Math.floor(idx / w);
-      if (x === 0 || y === 0 || x === w - 1 || y === h - 1) continue;
-      const dx = temp[i+4] - temp[i];
-      const dy = temp[i + w*4] - temp[i];
-      const edge = Math.abs(dx) + Math.abs(dy);
-      d[i] = d[i+1] = d[i+2] = Math.min(255, edge);
+      if (x === 0 || x === w - 1) continue;
+      const dx = Math.abs(temp[i+4] - temp[i-4]);
+      const dy = Math.abs(temp[i + w*4] - temp[i - w*4]);
+      const edge = dx + dy;
+      d[i] = d[i+1] = d[i+2] = Math.min(255, edge * 2);
     }
     ctx.putImageData(id, 0, 0);
   },
@@ -386,9 +446,11 @@ const filters = {
     const id = ctx.getImageData(0, 0, w, h);
     const d = id.data;
     for (let i = 0; i < d.length; i += 4) {
-      d[i] = (d[i] + d[Math.max(0, i-4)]) / 2;
-      d[i+1] = (d[i+1] + d[Math.max(0, i+1-4)]) / 2;
-      d[i+2] = (d[i+2] + d[Math.max(0, i+2-4)]) / 2;
+      if (i >= 4) {
+        d[i] = (d[i] + d[i-4]) / 2;
+        d[i+1] = (d[i+1] + d[i-3]) / 2;
+        d[i+2] = (d[i+2] + d[i-2]) / 2;
+      }
     }
     ctx.putImageData(id, 0, 0);
   },
@@ -396,9 +458,9 @@ const filters = {
     const id = ctx.getImageData(0, 0, w, h);
     const d = id.data;
     for (let i = 0; i < d.length; i += 4) {
-      d[i] = Math.min(255, d[i] * 1.5);
-      d[i+1] = Math.min(255, d[i+1] * 1.5);
-      d[i+2] = Math.min(255, d[i+2] * 1.5);
+      d[i] = Math.min(255, d[i] * 1.6);
+      d[i+1] = Math.min(255, d[i+1] * 1.6);
+      d[i+2] = Math.min(255, d[i+2] * 1.6);
     }
     ctx.putImageData(id, 0, 0);
   }
@@ -407,7 +469,7 @@ const filters = {
 async function setupCamera() {
   const video = document.getElementById("videoFeed");
   const canvas = document.getElementById("filterCanvas");
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
   try {
     cameraStream = await navigator.mediaDevices.getUserMedia({
@@ -415,25 +477,33 @@ async function setupCamera() {
     });
     video.srcObject = cameraStream;
 
-    video.onloadedmetadata = () => {
-      canvas.width = video.offsetWidth;
-      canvas.height = video.offsetHeight;
+    const startLoop = () => {
+      canvas.width = video.videoWidth || video.offsetWidth;
+      canvas.height = video.videoHeight || video.offsetHeight;
+      
+      const loop = () => {
+        try {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          if (currentFilter && filters[currentFilter]) {
+            filters[currentFilter](ctx, canvas.width, canvas.height);
+          }
+          canvas.style.display = "block";
+          requestAnimationFrame(loop);
+        } catch (e) {
+          requestAnimationFrame(loop);
+        }
+      };
+      loop();
     };
 
-    const loop = () => {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      if (filters[currentFilter]) {
-        filters[currentFilter](ctx, canvas.width, canvas.height);
-        canvas.style.display = "block";
-      } else {
-        canvas.style.display = "none";
-      }
-      requestAnimationFrame(loop);
-    };
-    loop();
+    if (video.readyState >= 2) {
+      startLoop();
+    } else {
+      video.onloadedmetadata = startLoop;
+    }
   } catch (e) {
     console.error("Camera error", e);
-    alert("Camera access denied. Snaps won't work.");
+    alert("Camera access needed for snaps!");
   }
 }
 
@@ -449,13 +519,15 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
 function captureSnap() {
   const video = document.getElementById("videoFeed");
   const canvas = document.createElement("canvas");
-  canvas.width = video.offsetWidth;
-  canvas.height = video.offsetHeight;
+  canvas.width = video.videoWidth || video.offsetWidth;
+  canvas.height = video.videoHeight || video.offsetHeight;
   const ctx = canvas.getContext("2d");
+  
   ctx.drawImage(video, 0, 0);
-  if (filters[currentFilter]) {
+  if (currentFilter && filters[currentFilter]) {
     filters[currentFilter](ctx, canvas.width, canvas.height);
   }
+  
   return canvas.toDataURL("image/png");
 }
 
@@ -482,7 +554,24 @@ document.getElementById("snapToChat").addEventListener("click", () => {
   renderChatModal(selectedChat.id, other);
   renderChats();
   updateStreak(selectedChat.id);
-  alert("Snap sent! 🍒");
+  
+  // Bot replies with snap back
+  setTimeout(() => {
+    if (Math.random() > 0.3) {
+      const botSnap = captureSnap();
+      state.messages[selectedChat.id].push({
+        from: other,
+        text: botSnap,
+        time: Date.now(),
+        isSnap: true
+      });
+      selectedChat.lastMessage = "📸 Snap";
+      saveState();
+      renderChatModal(selectedChat.id, other);
+      renderChats();
+      updateStreak(selectedChat.id);
+    }
+  }, 800 + Math.random() * 1200);
 });
 
 document.getElementById("snapToStory").addEventListener("click", () => {
