@@ -1,155 +1,91 @@
-/* ====== CHERRYCHAT UNIFIED HYBRID DESIGN SYSTEM ====== */
-:root {
-    --cherry-main: #ff4757;
-    --cherry-hover: #ff6b81;
-    --discord-bg-servers: #1e1f22;
-    --discord-bg-channels: #2b2d31;
-    --discord-bg-chat: #313338;
-    --discord-text-white: #f2f3f5;
-    --discord-text-muted: #949ba4;
-    --discord-input: #383a40;
-    --status-online: #23a55a;
-    --status-idle: #f0b232;
-    --status-dnd: #f23f43;
+:root{
+  --bg:#0f0f14; --panel:#15161b; --muted:#9aa0b2; --accent:#ff4b9a; --accent-2:#ff8ac0;
+  --online:#3ddc97; --offline:#ff4b5c; --glass: rgba(255,255,255,0.03);
+  --radius:12px; --mono: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+*{box-sizing:border-box}
+html,body,#app{height:100%}
+body{
+  margin:0; font-family:var(--mono); background:linear-gradient(180deg,#120617 0%, #050509 100%); color:#eef0f6;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; overflow:hidden;
 }
 
-* {
-    box-sizing: border-box; margin: 0; padding: 0;
-    font-family: 'gg sans', 'Segoe UI', Roboto, sans-serif;
-}
+/* AUTH */
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:420px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:16px;padding:14px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.brand{font-weight:800;letter-spacing:0.02em;display:flex;align-items:center;gap:8px}
+.logo-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.tabs{display:flex;gap:6px}
+.tab{background:transparent;border:0;color:var(--muted);padding:6px 10px;border-radius:999px;cursor:pointer}
+.tab.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#050509;font-weight:700}
+.card-body label{display:block;margin:8px 0;font-size:13px;color:var(--muted)}
+.card-body input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.25);color:inherit}
+.card-foot{margin-top:8px;text-align:center;color:var(--muted);font-size:12px}
 
-body {
-    background-color: var(--discord-bg-servers);
-    color: var(--discord-text-white);
-    height: 100vh; width: 100vw; display: flex; overflow: hidden;
-}
+/* APP GRID */
+.app-root{display:grid;grid-template-columns:72px 260px 1fr 320px;height:100vh;gap:0}
+.col{background:var(--panel);border-right:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column}
+.servers{align-items:center;padding:12px;gap:10px}
+.server-logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:900;color:#050509}
+.stack{display:flex;flex-direction:column;gap:8px;margin-top:8px;overflow:auto;padding:6px}
+.icon-btn{background:transparent;border:1px dashed rgba(255,255,255,0.06);color:var(--muted);padding:8px;border-radius:10px;cursor:pointer}
 
-/* Authentication Screen Coverlays */
-.screen-auth {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: #0f111a; z-index: 9999; display: flex; justify-content: center; align-items: center;
-}
-.screen-auth.hidden { display: none !important; }
-.auth-container {
-    background: var(--discord-bg-channels); padding: 40px; border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6); width: 100%; max-width: 440px;
-    border-top: 4px solid var(--cherry-main);
-}
-.auth-tabs { display: flex; margin-bottom: 24px; border-bottom: 2px solid var(--discord-input); }
-.auth-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: 600; color: var(--discord-text-muted); }
-.auth-tab.active { color: white; border-bottom: 2px solid var(--cherry-main); }
-.auth-form-panel { display: none; }
-.auth-form-panel.active { display: block; }
-h2 { font-size: 26px; font-weight: 800; margin-bottom: 6px; text-align: center; color: white; letter-spacing: -0.5px; }
-p { color: var(--discord-text-muted); font-size: 14px; text-align: center; margin-bottom: 24px; }
-.input-group { margin-bottom: 16px; }
-label { display: block; margin-bottom: 6px; color: var(--discord-text-muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
-input[type="text"] { width: 100%; padding: 12px; background: var(--discord-bg-servers); border: none; border-radius: 4px; color: white; font-size: 16px; }
-button { width: 100%; padding: 12px; background: var(--cherry-main); border: none; border-radius: 4px; color: white; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-button:hover { background: var(--cherry-hover); }
+/* CHANNELS */
+.channels{padding:12px;justify-content:space-between}
+.server-info h3{margin:0;font-size:16px}
+.list{overflow:auto;padding:6px}
+.channel{padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
+.channel.active{background:rgba(255,255,255,0.03);color:#fff}
 
-/* --- DESKTOP VIEW GRID SYSTEMS --- */
-.desktop-wrapper { display: flex; width: 100vw; height: 100vh; }
+/* PROFILE BAR */
+.profile-bar{display:flex;align-items:center;gap:10px;padding:10px;border-top:1px solid rgba(255,255,255,0.02)}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:#050509;font-weight:800}
+.status-pill{background:rgba(0,0,0,0.25);padding:6px;border-radius:999px;font-size:12px;display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.online{background:var(--online);box-shadow:0 0 8px var(--online)}
+.dot.offline{background:var(--offline);box-shadow:0 0 8px var(--offline)}
 
-/* COLUMN 1: Server Icons Strip */
-.sidebar-servers {
-    width: 72px; background: var(--discord-bg-servers);
-    display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 8px;
-}
-.server-icon {
-    width: 48px; height: 48px; background: var(--discord-bg-channels); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; transition: 0.2s;
-}
-.server-icon:hover, .server-icon.active { border-radius: 14px; background: var(--cherry-main); color: white; }
+/* CENTER */
+.center{display:flex;flex-direction:column}
+.center-head{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.channel-title{display:flex;align-items:center;gap:8px}
+.center-body{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.chat-feed{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+.msg{max-width:70%;padding:10px;border-radius:12px;font-size:14px}
+.msg.me{align-self:flex-end;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#050509}
+.msg.them{align-self:flex-start;background:rgba(255,255,255,0.02)}
+.msg .meta{font-size:11px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between}
 
-/* COLUMN 2: Navigation Item Drawer */
-.sidebar-lists { width: 240px; background: var(--discord-bg-channels); display: flex; flex-direction: column; }
-.sidebar-header {
-    height: 52px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid #1f2023; background: rgba(0,0,0,0.1);
-}
-.profile-meta { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; position: relative; }
+/* MEDIA ROW */
+.media-row{display:grid;grid-template-columns:1fr 360px;gap:12px;padding:12px;border-top:1px solid rgba(255,255,255,0.02)}
+.snap-panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:10px;border-radius:12px;display:flex;flex-direction:column;gap:8px}
+.video-wrap{position:relative;border-radius:10px;overflow:hidden;background:#000;height:220px;display:flex;align-items:center;justify-content:center}
+video#cam{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+canvas#snap-canvas{display:none}
+.filter-tag{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,0.5);padding:6px;border-radius:999px;font-size:12px}
+.filter-controls{display:flex;justify-content:space-between;align-items:center}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);cursor:pointer}
+.filter-btn.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#050509}
 
-/* Discord Active Custom Status Dots Indicator */
-.status-dot {
-    width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--discord-bg-channels);
-    position: absolute; bottom: -2px; left: 22px;
-}
-.status-dot.online { background-color: var(--status-online); }
-.status-dot.idle { background-color: var(--status-idle); }
-.status-dot.dnd { background-color: var(--status-dnd); }
+/* TIKTOK FEED */
+.tiktok-panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:10px;border-radius:12px;display:flex;flex-direction:column}
+.tiktok-feed{overflow:auto;display:flex;flex-direction:column;gap:10px}
+.tiktok-card{background:#0b0b0d;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.02)}
+.tiktok-card video{width:100%;height:200px;object-fit:cover}
 
-.status-selector {
-    background: var(--discord-bg-servers); border: none; color: var(--discord-text-muted);
-    font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;
-}
+/* INPUT */
+.chat-input{display:flex;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,0.02)}
+.chat-input input{flex:1;padding:10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
 
-.list-container { flex: 1; overflow-y: auto; padding: 8px; }
-.list-section-title { font-size: 11px; font-weight: 700; color: var(--discord-text-muted); text-transform: uppercase; padding: 8px 8px 4px 8px; }
+/* RIGHT */
+.right{padding:12px}
+.right-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.users .user{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px}
+.requests .req{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01)}
 
-.list-row {
-    display: flex; align-items: center; justify-content: space-between; padding: 10px 8px;
-    border-radius: 4px; cursor: pointer; margin-bottom: 2px; transition: 0.15s;
-}
-.list-row:hover { background: #35373c; }
-.list-row.active { background: #404249; color: white; }
-.row-left { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
-.row-avatar { width: 32px; height: 32px; background: var(--cherry-main); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: white; position: relative; }
-
-/* COLUMN 3: Right Main Workspace Panel */
-.main-chat-panel { flex: 1; background: var(--discord-bg-chat); display: flex; flex-direction: column; }
-.chat-header {
-    height: 52px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid #26272b; box-shadow: 0 1px 2px rgba(0,0,0,0.2); background: var(--discord-bg-chat);
-}
-
-/* Chat Log Views Layout Feed */
-.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-.msg { display: flex; flex-direction: column; font-size: 15px; color: #dbdee1; line-height: 1.4; }
-.msg strong { color: var(--discord-text-white); font-size: 14px; margin-right: 8px; }
-.msg-meta-line { display: flex; align-items: center; margin-bottom: 2px; }
-.msg-timestamp { font-size: 11px; color: var(--discord-text-muted); }
-.msg-body-content { padding-left: 0; color: #dbdee1; }
-.blue-checks { color: #53bdeb; margin-left: 6px; font-weight: bold; font-size: 13px; }
-
-/* TikTok Vertical Video Components Engine Layout */
-.tiktok-feed-view {
-    flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory;
-    height: calc(100vh - 52px); background: #000; display: flex; flex-direction: column;
-}
-.tiktok-video-card {
-    min-height: calc(100vh - 52px); width: 100%; scroll-snap-align: start;
-    position: relative; display: flex; justify-content: center; align-items: center; background: #111;
-}
-.tiktok-video-placeholder {
-    width: 100%; height: 100%; max-width: 400px; background: linear-gradient(45deg, #111, #222);
-    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;
-}
-.tiktok-overlay-ui {
-    position: absolute; bottom: 30px; left: 20px; right: 20px;
-    background: rgba(0,0,0,0.4); padding: 16px; border-radius: 8px; pointer-events: none;
-}
-
-/* Chat Box Input Area styling wrapper */
-.chat-input-area { padding: 0 16px 24px 16px; background: var(--discord-bg-chat); }
-.chat-input-wrapper { display: flex; background: var(--discord-input); border-radius: 8px; padding: 4px 14px; align-items: center; gap: 14px; }
-.chat-input-wrapper input { background: transparent; border: none; width: 100%; padding: 14px 0; color: white; outline: none; font-size: 15px; }
-
-.icon-btn { background: none; border: none; color: var(--discord-text-muted); font-size: 22px; cursor: pointer; transition: 0.15s; }
-.icon-btn:hover { color: var(--discord-text-white); transform: scale(1.05); }
-
-/* Snapchat Camera Modals Layout Processing */
-.camera-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 10000; display: none; flex-direction: column; }
-#camera-stream { width: 100%; flex: 1; object-fit: cover; }
-.filter-bar { display: flex; gap: 10px; padding: 14px; overflow-x: auto; background: #111; justify-content: center; }
-.filter-thumb { padding: 8px 16px; background: #2b2d31; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; }
-.filter-thumb.active { background: var(--cherry-main); }
-
-/* Snapchat Live Active Post-Processing Matrix Filters Overlays */
-.filter-normal { filter: none; transform: none; }
-.filter-vintage { filter: sepia(0.85) contrast(1.15); }
-.filter-neon { filter: hue-rotate(120deg) saturate(2.5); }
-.filter-bw { filter: grayscale(1) contrast(1.3); }
-.filter-anime { filter: saturate(1.8) hue-rotate(-20deg); clip-path: circle(48% at 50% 50%); }
-
-.dashboard-actions-view { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+/* UTIL */
+.btn{padding:8px 12px;border-radius:999px;border:0;cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#050509;font-weight:700}
+small{color:var(--muted)}
