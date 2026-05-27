@@ -7,9 +7,12 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <!-- AUTH -->
   <div id="auth" class="auth-overlay">
     <div class="auth-card">
       <h1 class="brand">CherryChat</h1>
+
       <div class="auth-tabs">
         <button class="auth-tab active" data-panel="login">Login</button>
         <button class="auth-tab" data-panel="register">Register</button>
@@ -17,23 +20,23 @@
 
       <div id="auth-panel-login" class="auth-panel active">
         <label>Username
-          <input id="login-username" autocomplete="username" />
+          <input id="login-username" />
         </label>
         <label>Password
-          <input id="login-password" type="password" autocomplete="current-password" />
+          <input id="login-password" type="password" />
         </label>
         <button id="btn-login" class="btn primary">Login</button>
       </div>
 
       <div id="auth-panel-register" class="auth-panel">
         <label>Username
-          <input id="reg-username" autocomplete="username" />
+          <input id="reg-username" />
         </label>
         <label>Display name
           <input id="reg-display" />
         </label>
         <label>Password
-          <input id="reg-password" type="password" autocomplete="new-password" />
+          <input id="reg-password" type="password" />
         </label>
         <label>Bio
           <input id="reg-bio" maxlength="120" />
@@ -41,50 +44,55 @@
         <button id="btn-register" class="btn primary">Create account</button>
       </div>
 
-      <p class="auth-note">All data is stored locally in your browser only.</p>
+      <p class="auth-note">Local-only demo. No server.</p>
     </div>
   </div>
 
+  <!-- APP -->
   <div id="app" class="app-root" hidden>
-    <header class="top-bar">
-      <div class="top-left">
-        <span class="logo-dot"></span>
-        <span class="top-title">CherryChat</span>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="logo-dot"></div>
+        <h2 class="sidebar-title">CherryChat</h2>
       </div>
-      <div class="top-center">
-        <button class="nav-tab active" data-view="chats">Chats</button>
-        <button class="nav-tab" data-view="snaps">Snaps</button>
-        <button class="nav-tab" data-view="profile">Profile</button>
-      </div>
-      <div class="top-right">
+
+      <nav class="sidebar-nav">
+        <button class="side-btn active" data-view="chats">💬 Chats</button>
+        <button class="side-btn" data-view="snaps">📸 Snaps</button>
+        <button class="side-btn" data-view="profile">👤 Profile</button>
+      </nav>
+
+      <div class="sidebar-bottom">
         <select id="theme-select" class="theme-select">
           <option value="light">Soft Pink</option>
           <option value="aqua">Pale Aqua</option>
           <option value="dark">Dark Neon</option>
         </select>
-        <button id="btn-logout" class="icon-btn">Logout</button>
+        <button id="btn-logout" class="btn small">Logout</button>
       </div>
-    </header>
+    </aside>
 
-    <main class="view-root">
-      <!-- CHATS VIEW -->
+    <!-- MAIN CONTENT -->
+    <main class="main-view">
+
+      <!-- CHATS -->
       <section id="view-chats" class="view active">
-        <aside class="chats-list">
+        <div class="chats-list">
           <div class="chats-head">
-            <h2>Chats</h2>
-            <button id="btn-new-chat" class="icon-btn">＋</button>
+            <h3>Chats</h3>
+            <button id="btn-new-chat" class="btn small">＋</button>
           </div>
           <div id="chat-list" class="list"></div>
-        </aside>
+        </div>
 
-        <section class="chat-main">
+        <div class="chat-main">
           <header class="chat-header">
-            <div class="chat-target">
-              <div id="chat-avatar" class="avatar small"></div>
-              <div>
-                <div id="chat-name" class="chat-name">No chat selected</div>
-                <div id="chat-status" class="chat-status"></div>
-              </div>
+            <div id="chat-avatar" class="avatar small"></div>
+            <div>
+              <div id="chat-name" class="chat-name">No chat selected</div>
+              <div id="chat-status" class="chat-status"></div>
             </div>
           </header>
 
@@ -94,74 +102,66 @@
             <input id="msg-input" placeholder="Send a message..." />
             <button id="btn-send" class="btn primary">Send</button>
           </footer>
-        </section>
+        </div>
       </section>
 
-      <!-- SNAPS VIEW -->
+      <!-- SNAPS -->
       <section id="view-snaps" class="view">
-        <div class="snaps-layout">
-          <div class="camera-panel">
-            <h2>Camera</h2>
-            <div class="camera-frame">
-              <video id="cam" autoplay playsinline muted></video>
-              <canvas id="snap-canvas"></canvas>
-              <div class="filter-label">Filter: <span id="filter-name">Neon</span></div>
-            </div>
-            <div class="filter-row">
-              <button class="filter-btn active" data-filter="neon">Neon</button>
-              <button class="filter-btn" data-filter="vintage">Vintage</button>
-              <button class="filter-btn" data-filter="bw">B&amp;W</button>
-              <button class="filter-btn" data-filter="film">Film</button>
-              <button class="filter-btn" data-filter="edge">Edge</button>
-            </div>
-            <div class="snap-actions">
-              <button id="btn-snap-chat" class="btn primary">Send to chat</button>
-              <button id="btn-snap-story" class="btn">Add to story</button>
-              <button id="btn-snap-gallery" class="btn">Save to gallery</button>
-            </div>
-          </div>
-
-          <div class="story-panel">
-            <h2>Stories</h2>
-            <div id="story-list" class="story-list"></div>
-          </div>
+        <div class="camera-frame">
+          <video id="cam" autoplay playsinline muted></video>
+          <canvas id="snap-canvas"></canvas>
+          <div class="filter-label">Filter: <span id="filter-name">Neon</span></div>
         </div>
+
+        <div class="filter-row">
+          <button class="filter-btn active" data-filter="neon">Neon</button>
+          <button class="filter-btn" data-filter="vintage">Vintage</button>
+          <button class="filter-btn" data-filter="bw">B&W</button>
+          <button class="filter-btn" data-filter="film">Film</button>
+          <button class="filter-btn" data-filter="edge">Edge</button>
+        </div>
+
+        <div class="snap-actions">
+          <button id="btn-snap-chat" class="btn primary">Send to chat</button>
+          <button id="btn-snap-story" class="btn">Add to story</button>
+          <button id="btn-snap-gallery" class="btn">Save to gallery</button>
+        </div>
+
+        <h3>Your Story</h3>
+        <div id="story-list" class="story-list"></div>
       </section>
 
-      <!-- PROFILE VIEW -->
+      <!-- PROFILE -->
       <section id="view-profile" class="view">
-        <div class="profile-layout">
-          <div class="profile-main">
-            <div class="profile-avatar-wrap">
-              <div id="profile-avatar" class="avatar large"></div>
-              <div id="profile-story-ring" class="story-ring hidden"></div>
-            </div>
-            <div class="profile-info">
-              <h2 id="profile-name"></h2>
-              <p id="profile-username" class="muted"></p>
-              <p id="profile-bio"></p>
-              <p class="muted" id="profile-status-text"></p>
-            </div>
-            <div class="profile-actions">
-              <label class="btn small">
-                Upload avatar
-                <input id="avatar-input" type="file" accept="image/*" hidden />
-              </label>
-              <button id="btn-set-status" class="btn small">Set status</button>
-            </div>
+        <div class="profile-main">
+          <div class="profile-avatar-wrap">
+            <div id="profile-avatar" class="avatar large"></div>
+            <div id="profile-story-ring" class="story-ring hidden"></div>
           </div>
 
-          <div class="profile-section">
-            <h3>Your story</h3>
-            <div id="profile-story" class="profile-story empty">No active story</div>
+          <div class="profile-info">
+            <h2 id="profile-name"></h2>
+            <p id="profile-username" class="muted"></p>
+            <p id="profile-bio"></p>
+            <p id="profile-status-text" class="muted"></p>
           </div>
 
-          <div class="profile-section">
-            <h3>Gallery</h3>
-            <div id="gallery-grid" class="gallery-grid"></div>
+          <div class="profile-actions">
+            <label class="btn small">
+              Upload avatar
+              <input id="avatar-input" type="file" accept="image/*" hidden />
+            </label>
+            <button id="btn-set-status" class="btn small">Set status</button>
           </div>
         </div>
+
+        <h3>Your Story</h3>
+        <div id="profile-story" class="profile-story empty">No active story</div>
+
+        <h3>Gallery</h3>
+        <div id="gallery-grid" class="gallery-grid"></div>
       </section>
+
     </main>
   </div>
 
