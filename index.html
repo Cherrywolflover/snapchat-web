@@ -12,7 +12,7 @@
     <div id="screen-profile" class="screen active">
         <div class="auth-container">
             <h2>Welcome to ClassChat</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Pick a username to start chatting instantly!</p>
+            <p>Pick a username to start chatting instantly!</p>
             <div class="input-group">
                 <label>Your Name</label>
                 <input type="text" id="reg-name" placeholder="John Doe">
@@ -29,7 +29,7 @@
     <div id="screen-main" class="screen">
         <div class="app-header">
             <h3 id="display-username">@username</h3>
-            <button class="action-btn" onclick="logout()" style="background: transparent; color: var(--text-muted);">Log Out</button>
+            <button class="action-btn" onclick="logout()" style="background: transparent; color: var(--discord-text-muted);">Log Out</button>
         </div>
         
         <div class="tabs">
@@ -44,7 +44,7 @@
 
         <div id="tab-servers" class="tab-content">
             <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <input type="text" id="new-server-name" placeholder="Server name..." style="padding: 10px;">
+                <input type="text" id="new-server-name" placeholder="Server name..." style="background:#1e1f22; border:none; padding:10px; border-radius:4px; color:white; flex:1;">
                 <button class="action-btn" onclick="createServer()">+ Create</button>
             </div>
             <div id="servers-list"></div>
@@ -52,12 +52,12 @@
 
         <div id="tab-friends" class="tab-content">
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <input type="text" id="search-friend-username" placeholder="Type classmate's username...">
+                <input type="text" id="search-friend-username" placeholder="Type classmate's username..." style="background:#1e1f22; border:none; padding:10px; border-radius:4px; color:white; flex:1;">
                 <button class="action-btn" onclick="sendFriendRequest()">Add</button>
             </div>
-            <h4 style="margin-bottom: 10px; color: var(--text-muted)">Pending Requests</h4>
+            <h4 style="margin-bottom: 10px; color: var(--discord-text-muted)">Pending Requests</h4>
             <div id="pending-requests-list" style="margin-bottom: 20px;"></div>
-            <h4 style="margin-bottom: 10px; color: var(--text-muted)">All Friends</h4>
+            <h4 style="margin-bottom: 10px; color: var(--discord-text-muted)">All Friends</h4>
             <div id="friends-list"></div>
         </div>
     </div>
@@ -72,9 +72,11 @@
         <div class="chat-view">
             <div class="chat-messages" id="chat-messages-container"></div>
             <div class="chat-input-area">
-                <button class="icon-btn" onclick="openCamera()">📷</button>
-                <input type="text" id="chat-inline-input" placeholder="Send a message..." style="flex: 1;">
-                <button class="icon-btn" onclick="sendTextMessage()">➔</button>
+                <div class="chat-input-wrapper">
+                    <button class="icon-btn" onclick="openCamera()">📷</button>
+                    <input type="text" id="chat-inline-input" placeholder="Send a message...">
+                    <button class="icon-btn" onclick="sendTextMessage()">➔</button>
+                </div>
             </div>
         </div>
     </div>
@@ -90,11 +92,10 @@
         </div>
         <div style="padding: 20px; display: flex; justify-content: space-around; background: #000;">
             <button class="action-btn" onclick="closeCamera()" style="background: #333;">Cancel</button>
-            <button class="action-btn" onclick="captureAndSendPhoto()" style="background: var(--online);">Snap & Send</button>
+            <button class="action-btn" onclick="captureAndSendPhoto()" style="background: var(--discord-online);">Snap & Send</button>
         </div>
     </div>
 
-    <!-- FIXED TO MATCH YOUR GITHUB FILE NAME -->
     <script src="app.js"></script>
 </body>
 </html>
