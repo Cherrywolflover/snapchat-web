@@ -8,20 +8,39 @@
 </head>
 <body>
 
-    <!-- DISCORD REGISTRATION WALL -->
+    <!-- DISCORD REGISTRATION & LOGIN WALL -->
     <div id="auth-wall" class="screen-auth">
         <div class="auth-container">
-            <h2>Welcome to ClassChat</h2>
-            <p>Pick a profile name and username to start chatting instantly!</p>
-            <div class="input-group">
-                <label>Your Name</label>
-                <input type="text" id="reg-name" placeholder="John Doe">
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-btn-register" onclick="switchAuthTab('register')">Register</div>
+                <div class="auth-tab" id="tab-btn-login" onclick="switchAuthTab('login')">Login</div>
             </div>
-            <div class="input-group">
-                <label>Username</label>
-                <input type="text" id="reg-user" placeholder="johndoe123">
+
+            <!-- REGISTER FORM PANEL -->
+            <div id="panel-register" class="auth-form-panel active">
+                <h2>Create an Account</h2>
+                <p>Pick a profile name and username to start chatting instantly!</p>
+                <div class="input-group">
+                    <label>Your Name</label>
+                    <input type="text" id="reg-name" placeholder="John Doe">
+                </div>
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="reg-user" placeholder="johndoe123">
+                </div>
+                <button onclick="handleProfileSubmit()">BAM! Launch Desktop</button>
             </div>
-            <button onclick="handleProfileSubmit()">BAM! Launch Desktop</button>
+
+            <!-- LOGIN FORM PANEL -->
+            <div id="panel-login" class="auth-form-panel">
+                <h2>Welcome Back!</h2>
+                <p>Enter your existing unique username to sign back in.</p>
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="login-user" placeholder="johndoe123">
+                </div>
+                <button onclick="handleLoginSubmit()">BAM! Sign In</button>
+            </div>
         </div>
     </div>
 
