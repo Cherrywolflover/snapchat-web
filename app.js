@@ -1,461 +1,612 @@
-// app.js (ES module)
-const STORAGE = "cherrychat_v2";
+const STORAGE_KEY = "cherrychat_snap_v1";
+
 const ping = document.getElementById("ping");
 
-// ---------- State engine (localStorage) ----------
+// ---------- STATE ----------
 const defaultState = {
   users: {},
-  servers: {},
-  messages: {},
-  dms: {},
-  friendRequests: [],
-  snapStreaks: {},
   currentUser: null,
-  currentServer: null,
-  currentChannel: null
+  chats: {},          // key: "me::other" sorted
+  stories: {},        // username -> { image, ts }
+  theme: "light"      // "light" | "aqua" | "dark"
 };
 
-let state = load();
+let state = loadState();
 
-function load(){
+function loadState(){
   try{
-    const raw = localStorage.getItem(STORAGE);
-    if(!raw) {
-      const s = seed(structuredClone(defaultState));
-      localStorage.setItem(STORAGE, JSON.stringify(s));
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw){
+      const s = structuredClone(defaultState);
+      seedDemo(s);
+      saveState(s);
       return s;
     }
-    return {...structuredClone(defaultState), ...JSON.parse(raw)};
+    const parsed = JSON.parse(raw);
+    return { ...structuredClone(defaultState), ...parsed };
   }catch(e){
-    console.error("load error", e);
-    const s = seed(structuredClone(defaultState));
-    localStorage.setItem(STORAGE, JSON.stringify(s));
+    console.error(e);
+    const s = structuredClone(defaultState);
+    seedDemo(s);
+    saveState(s);
     return s;
   }
 }
-
-function save(){ localStorage.setItem(STORAGE, JSON.stringify(state)); }
-
-// ---------- Seed demo data ----------
-function seed(s){
-  s.users["cherry"] = { username:"cherry", displayName:"Cherry Wolf", password:"demo", bio:"Prototype queen", status:"online", friends:["luna"] };
-  s.users["luna"] = { username:"luna", displayName:"Luna Howl", password:"demo", bio:"Moon coder", status:"online", friends:["cherry"] };
-  const sid = "server-main";
-  s.servers[sid] = { id:sid, name:"Cherry Lounge", description:"Cozy chaos", channels:[{id:"general",name:"general",desc:"Main chat"}], members:["cherry","luna"] };
-  s.currentServer = sid;
-  s.currentChannel = "general";
-  s.messages[`${sid}::general`] = [
-    { id:"m1", from:"luna", text:"Welcome to CherryChat demo", ts:Date.now()-600000 },
-    { id:"m2", from:"cherry", text:"Say hi to the wolves", ts:Date.now()-300000 }
-  ];
-  // small tiktok seed
-  window.__tiktok = [
-    { id:"v1", title:"Flower loop", creator:"Luna", src:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4", stats:{likes:120,comments:12} }
-  ];
-  return s;
+function saveState(s = state){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
 }
 
-// ---------- DOM helpers ----------
+// demo user
+function seedDemo(s){
+  s.users["cherry"] = {
+    username:"cherry",
+    displayName:"Cherry Wolf",
+    password:"demo",
+    bio:"Prototype queen of CherryChat",
+    status:"Online",
+    avatar:null,
+    gallery:[],
+  };
+  s.currentUser = null;
+}
+
+// ---------- DOM HELPERS ----------
 const $ = sel => document.querySelector(sel);
 const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-// ---------- Auth UI ----------
-$$(".tab").forEach(t => t.addEventListener("click", e => {
-  $$(".tab").forEach(x=>x.classList.remove("active"));
-  t.classList.add("active");
-  $$(".panel").forEach(p=>p.classList.remove("active"));
-  $(`#panel-${t.dataset.panel}`).classList.add("active");
-}));
+// ---------- AUTH ----------
+$$(".auth-tab").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    $$(".auth-tab").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const panel = btn.dataset.panel;
+    $$(".auth-panel").forEach(p=>p.classList.remove("active"));
+    $("#auth-panel-"+panel).classList.add("active");
+  });
+});
 
-$("#btn-register").addEventListener("click", () => {
+$("#btn-register").addEventListener("click", ()=>{
   const u = $("#reg-username").value.trim().toLowerCase();
   const d = $("#reg-display").value.trim() || u;
   const p = $("#reg-password").value;
-  const bio = $("#reg-bio").value || "";
-  if(!u || !p){ alert("username & password required"); return; }
-  if(state.users[u]){ alert("username taken"); return; }
-  state.users[u] = { username:u, displayName:d, password:p, bio, status:"online", friends:[] };
+  const bio = $("#reg-bio").value.trim();
+  if(!u || !p){ alert("Username and password required"); return; }
+  if(state.users[u]){ alert("Username already exists"); return; }
+  state.users[u] = {
+    username:u,
+    displayName:d,
+    password:p,
+    bio,
+    status:"Online",
+    avatar:null,
+    gallery:[]
+  };
   state.currentUser = u;
-  save();
-  enter();
+  saveState();
+  enterApp();
 });
 
-$("#btn-login").addEventListener("click", () => {
+$("#btn-login").addEventListener("click", ()=>{
   const u = $("#login-username").value.trim().toLowerCase();
   const p = $("#login-password").value;
   const user = state.users[u];
-  if(!user || user.password !== p){ alert("invalid credentials"); return; }
-  user.status = "online";
+  if(!user || user.password !== p){
+    alert("Invalid username or password");
+    return;
+  }
   state.currentUser = u;
-  save();
-  enter();
+  user.status = "Online";
+  saveState();
+  enterApp();
 });
 
-$("#btn-logout").addEventListener("click", () => {
-  if(state.currentUser) state.users[state.currentUser].status = "offline";
+$("#btn-logout").addEventListener("click", ()=>{
+  if(state.currentUser && state.users[state.currentUser]){
+    state.users[state.currentUser].status = "Offline";
+  }
   state.currentUser = null;
-  save();
-  $("#auth").style.display = "";
+  saveState();
   $("#app").hidden = true;
+  $("#auth").style.display = "";
 });
 
-// ---------- Enter app ----------
-function enter(){
-  $("#auth").style.display = "none";
-  $("#app").hidden = false;
-  renderAll();
-  startCam();
+// auto-login if remembered
+if(state.currentUser && state.users[state.currentUser]){
+  enterApp();
 }
 
-// Auto-enter if user exists
-if(state.currentUser && state.users[state.currentUser]) {
+// ---------- APP ENTRY ----------
+function enterApp(){
   $("#auth").style.display = "none";
   $("#app").hidden = false;
+  applyTheme(state.theme);
+  $("#theme-select").value = state.theme;
   renderAll();
-  startCam();
+  startCamera();
 }
 
-// ---------- Rendering ----------
+// ---------- THEME ----------
+$("#theme-select").addEventListener("change", e=>{
+  const val = e.target.value;
+  state.theme = val;
+  saveState();
+  applyTheme(val);
+});
+
+function applyTheme(theme){
+  document.body.classList.remove("theme-aqua","theme-dark");
+  if(theme === "aqua") document.body.classList.add("theme-aqua");
+  else if(theme === "dark") document.body.classList.add("theme-dark");
+}
+
+// ---------- RENDER ROOT ----------
 function renderAll(){
+  renderChatsList();
+  renderChatView(null);
   renderProfile();
-  renderServers();
-  renderChannels();
-  renderChat();
-  renderUsers();
-  renderRequests();
-  renderHeaderStats();
-  renderTikTok();
+  renderStories();
 }
 
-function renderProfile(){
-  const u = state.currentUser && state.users[state.currentUser];
-  if(!u) return;
-  $("#profile-name").textContent = u.displayName || u.username;
-  $("#profile-avatar").textContent = (u.displayName||u.username)[0].toUpperCase();
-  const dot = $("#status-dot");
-  if(u.status === "online"){ dot.classList.remove("offline"); dot.classList.add("online"); $("#status-text").textContent="Online"; } else { dot.classList.remove("online"); dot.classList.add("offline"); $("#status-text").textContent="Offline"; }
-}
-
-function renderServers(){
-  const container = $("#servers");
-  container.innerHTML = "";
-  Object.values(state.servers).forEach(s => {
-    const el = document.createElement("button");
-    el.className = "channel";
-    el.textContent = s.name[0].toUpperCase();
-    if(s.id === state.currentServer) el.classList.add("active");
-    el.addEventListener("click", () => {
-      state.currentServer = s.id;
-      state.currentChannel = s.channels[0]?.id || null;
-      save(); renderAll();
-    });
-    container.appendChild(el);
+// ---------- NAV ----------
+$$(".nav-tab").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    $$(".nav-tab").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const view = btn.dataset.view;
+    $$(".view").forEach(v=>v.classList.remove("active"));
+    $("#view-"+view).classList.add("active");
   });
-}
-
-$("#add-server").addEventListener("click", () => {
-  const name = prompt("Server name");
-  if(!name) return;
-  const id = "srv-" + Date.now();
-  state.servers[id] = { id, name, description:"Custom server", channels:[{id:"general",name:"general",desc:"Main"}], members:[state.currentUser] };
-  state.currentServer = id; state.currentChannel = "general"; save(); renderAll();
 });
 
-function renderChannels(){
-  const list = $("#channel-list");
-  list.innerHTML = "";
-  const srv = state.servers[state.currentServer];
-  if(!srv) return;
-  $("#server-name").textContent = srv.name;
-  $("#server-desc").textContent = srv.description;
-  srv.channels.forEach(ch => {
-    const el = document.createElement("div");
-    el.className = "channel" + (ch.id === state.currentChannel ? " active" : "");
-    el.textContent = "#" + ch.name;
-    el.addEventListener("click", () => { state.currentChannel = ch.id; save(); renderChat(); renderChannels(); });
-    list.appendChild(el);
-  });
+// ---------- CHATS ----------
+let currentChatTarget = null; // username
+
+function chatKey(a,b){
+  const arr = [a,b].sort();
+  return arr.join("::");
 }
 
-function renderChat(){
-  const feed = $("#chat-feed");
-  feed.innerHTML = "";
-  const srv = state.servers[state.currentServer];
-  if(!srv || !state.currentChannel) return;
-  const key = `${srv.id}::${state.currentChannel}`;
-  const msgs = (state.messages[key] || []).slice().sort((a,b)=>a.ts-b.ts);
-  msgs.forEach(m => {
-    const el = document.createElement("div");
-    el.className = "msg " + (m.from === state.currentUser ? "me" : "them");
-    el.innerHTML = `<div class="text">${escapeHtml(m.text||"")}</div>`;
-    if(m.image) {
+function renderChatsList(){
+  const me = state.currentUser;
+  if(!me) return;
+  const list = $("#chat-list");
+  list.innerHTML = "";
+  const entries = Object.entries(state.chats)
+    .filter(([key])=>key.includes(me))
+    .map(([key,chat])=>{
+      const [u1,u2] = key.split("::");
+      const other = u1 === me ? u2 : u1;
+      return { other, chat };
+    });
+
+  if(entries.length === 0){
+    list.innerHTML = "<div class='muted' style='padding:6px;'>No chats yet. Start one!</div>";
+    return;
+  }
+
+  entries.sort((a,b)=>{
+    const la = a.chat.messages?.[a.chat.messages.length-1]?.ts || 0;
+    const lb = b.chat.messages?.[b.chat.messages.length-1]?.ts || 0;
+    return lb - la;
+  });
+
+  for(const {other,chat} of entries){
+    const user = state.users[other];
+    if(!user) continue;
+    const item = document.createElement("div");
+    item.className = "chat-item" + (other === currentChatTarget ? " active" : "");
+    const avatar = document.createElement("div");
+    avatar.className = "avatar small";
+    if(user.avatar){
       const img = document.createElement("img");
-      img.src = m.image; img.style.maxWidth="320px"; img.style.borderRadius="8px"; img.style.marginTop="8px";
+      img.src = user.avatar;
+      avatar.appendChild(img);
+    }else{
+      avatar.textContent = (user.displayName||user.username)[0].toUpperCase();
+    }
+    const textWrap = document.createElement("div");
+    const name = document.createElement("div");
+    name.textContent = user.displayName || user.username;
+    const meta = document.createElement("div");
+    meta.className = "chat-meta";
+    const last = chat.messages?.[chat.messages.length-1];
+    meta.textContent = last ? (last.text || "[Snap]") : "No messages yet";
+    textWrap.appendChild(name);
+    textWrap.appendChild(meta);
+    item.appendChild(avatar);
+    item.appendChild(textWrap);
+    item.addEventListener("click", ()=>{
+      currentChatTarget = other;
+      renderChatsList();
+      renderChatView(other);
+    });
+    list.appendChild(item);
+  }
+}
+
+$("#btn-new-chat").addEventListener("click", ()=>{
+  const me = state.currentUser;
+  if(!me) return;
+  const username = prompt("Start chat with username:");
+  if(!username) return;
+  const u = username.trim().toLowerCase();
+  if(!state.users[u]){ alert("User not found"); return; }
+  const key = chatKey(me,u);
+  if(!state.chats[key]) state.chats[key] = { messages:[] };
+  currentChatTarget = u;
+  saveState();
+  renderChatsList();
+  renderChatView(u);
+});
+
+function renderChatView(target){
+  const me = state.currentUser;
+  const nameEl = $("#chat-name");
+  const statusEl = $("#chat-status");
+  const avatarEl = $("#chat-avatar");
+  const feed = $("#chat-feed");
+
+  if(!me || !target){
+    nameEl.textContent = "No chat selected";
+    statusEl.textContent = "";
+    avatarEl.innerHTML = "";
+    feed.innerHTML = "<div class='muted'>Select or create a chat.</div>";
+    return;
+  }
+
+  const user = state.users[target];
+  if(!user) return;
+  nameEl.textContent = user.displayName || user.username;
+  statusEl.textContent = user.status || "";
+  avatarEl.innerHTML = "";
+  if(user.avatar){
+    const img = document.createElement("img");
+    img.src = user.avatar;
+    avatarEl.appendChild(img);
+  }else{
+    avatarEl.textContent = (user.displayName||user.username)[0].toUpperCase();
+  }
+
+  const key = chatKey(me,target);
+  const chat = state.chats[key] || { messages:[] };
+  feed.innerHTML = "";
+  chat.messages.forEach(m=>{
+    const el = document.createElement("div");
+    el.className = "msg " + (m.from === me ? "me" : "them");
+    const text = document.createElement("div");
+    text.textContent = m.text || "";
+    el.appendChild(text);
+    if(m.image){
+      const img = document.createElement("img");
+      img.src = m.image;
       el.appendChild(img);
     }
-    const meta = document.createElement("div"); meta.className="meta";
-    meta.innerHTML = `<span>${state.users[m.from]?.displayName||m.from}</span><span>${new Date(m.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+    const meta = document.createElement("div");
+    meta.className = "msg-meta";
+    meta.innerHTML = `<span>${m.from === me ? "You" : (user.displayName||user.username)}</span><span>${new Date(m.ts).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</span>`;
     el.appendChild(meta);
     feed.appendChild(el);
   });
   feed.scrollTop = feed.scrollHeight;
 }
 
-function renderUsers(){
-  const list = $("#user-list");
-  list.innerHTML = "";
-  const srv = state.servers[state.currentServer];
-  if(!srv) return;
-  let online = 0;
-  srv.members.forEach(u => {
-    const user = state.users[u];
-    if(!user) return;
-    const el = document.createElement("div"); el.className="user";
-    el.innerHTML = `<div class="avatar">${(user.displayName||user.username)[0].toUpperCase()}</div><div style="flex:1"><div>${user.displayName||user.username}</div><div style="font-size:12px;color:var(--muted)">${user.status}</div></div>`;
-    el.addEventListener("click", () => openDM(state.currentUser, user.username));
-    list.appendChild(el);
-    if(user.status === "online") online++;
-  });
-  $("#online-count").textContent = online;
-}
-
-function renderRequests(){
-  const container = $("#requests");
-  container.innerHTML = "";
-  const me = state.currentUser;
-  if(!me) return;
-  const reqs = state.friendRequests.filter(r => r.to === me);
-  if(reqs.length === 0) { container.innerHTML = "<div class='empty'>No pending requests</div>"; return; }
-  reqs.forEach(r => {
-    const el = document.createElement("div"); el.className="req";
-    el.innerHTML = `<div>${state.users[r.from]?.displayName||r.from}</div><div><button data-from="${r.from}" class="accept">Accept</button><button data-from="${r.from}" class="reject">Reject</button></div>`;
-    container.appendChild(el);
-  });
-  container.querySelectorAll(".accept").forEach(b => b.addEventListener("click", e => handleRequest(e.target.dataset.from, true)));
-  container.querySelectorAll(".reject").forEach(b => b.addEventListener("click", e => handleRequest(e.target.dataset.from, false)));
-}
-
-function handleRequest(from, accept){
-  const me = state.currentUser;
-  if(!me) return;
-  if(accept){
-    if(!state.users[from].friends.includes(me)) state.users[from].friends.push(me);
-    if(!state.users[me].friends.includes(from)) state.users[me].friends.push(from);
-  }
-  state.friendRequests = state.friendRequests.filter(r => !(r.from===from && r.to===me));
-  save(); renderRequests(); renderUsers();
-}
-
-function renderHeaderStats(){
-  const me = state.currentUser;
-  if(!me) return;
-  $("#streak-count").textContent = state.snapStreaks[me] || 0;
-  $("#dm-count").textContent = Object.values(state.dms).filter(d => d.participants?.includes(me)).length;
-}
-
-// ---------- Chat send ----------
 $("#btn-send").addEventListener("click", sendMessage);
-$("#msg-input").addEventListener("keydown", e => { if(e.key === "Enter") sendMessage(); });
+$("#msg-input").addEventListener("keydown", e=>{
+  if(e.key === "Enter") sendMessage();
+});
 
 function sendMessage(){
-  const me = state.currentUser; if(!me) return;
-  const srv = state.servers[state.currentServer]; if(!srv) return;
-  const ch = state.currentChannel; if(!ch) return;
-  const key = `${srv.id}::${ch}`;
+  const me = state.currentUser;
+  if(!me || !currentChatTarget) return;
   const text = $("#msg-input").value.trim();
   if(!text) return;
-  state.messages[key] = state.messages[key] || [];
-  state.messages[key].push({ id:"m"+Date.now(), from:me, text, ts:Date.now() });
+  const key = chatKey(me,currentChatTarget);
+  if(!state.chats[key]) state.chats[key] = { messages:[] };
+  state.chats[key].messages.push({
+    from: me,
+    text,
+    ts: Date.now()
+  });
   $("#msg-input").value = "";
-  save(); renderChat(); notifyIncoming();
+  saveState();
+  renderChatsList();
+  renderChatView(currentChatTarget);
+  notify();
 }
 
-// ---------- DM (simple) ----------
-function openDM(a,b){
-  const participants = [a,b].sort();
-  const id = "dm-"+participants.join("-");
-  if(!state.dms[id]) state.dms[id] = { id, participants, messages:[] };
-  save(); renderHeaderStats();
-  alert(`DM created: ${participants.join(", ")}`);
+// ---------- NOTIFY ----------
+function notify(){
+  try{
+    ping.currentTime = 0;
+    ping.play().catch(()=>{});
+  }catch(e){}
+  if(navigator.vibrate) navigator.vibrate(50);
 }
 
-// ---------- Notifications (audio + vibration) ----------
-function notifyIncoming(){
-  try{ ping.currentTime = 0; ping.play().catch(()=>{}); }catch(e){}
-  if(navigator.vibrate) navigator.vibrate(60);
-}
-
-// ---------- Webcam + filters (canvas processing) ----------
+// ---------- CAMERA + FILTERS ----------
 const cam = $("#cam");
 const canvas = $("#snap-canvas");
 const ctx = canvas.getContext("2d");
 let stream = null;
 let currentFilter = "neon";
 
-async function startCam(){
+async function startCamera(){
   try{
-    stream = await navigator.mediaDevices.getUserMedia({ video:{ width:640, height:360 }, audio:false });
+    stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
     cam.srcObject = stream;
     cam.play();
     requestAnimationFrame(drawFrame);
   }catch(e){
-    console.warn("webcam denied or unavailable", e);
+    console.warn("Camera unavailable", e);
   }
 }
 
 function drawFrame(){
   if(cam.videoWidth && cam.videoHeight){
-    canvas.width = cam.videoWidth; canvas.height = cam.videoHeight;
-    // mirror
-    ctx.save(); ctx.scale(-1,1); ctx.drawImage(cam, -canvas.width, 0, canvas.width, canvas.height); ctx.restore();
-    // apply filter pipeline
-    applyFilterPipeline(ctx, canvas, currentFilter);
+    canvas.width = cam.videoWidth;
+    canvas.height = cam.videoHeight;
+    ctx.save();
+    ctx.scale(-1,1);
+    ctx.drawImage(cam, -canvas.width, 0, canvas.width, canvas.height);
+    ctx.restore();
+    applyFilter(currentFilter);
   }
   requestAnimationFrame(drawFrame);
 }
 
-function applyFilterPipeline(ctx, canvas, filter){
-  // We'll use pixel manipulation for stronger effects
+function applyFilter(filter){
+  const img = ctx.getImageData(0,0,canvas.width,canvas.height);
+  const d = img.data;
   if(filter === "neon"){
-    // increase contrast + color tint
-    ctx.globalCompositeOperation = "source-over";
-    const img = ctx.getImageData(0,0,canvas.width,canvas.height);
-    const d = img.data;
     for(let i=0;i<d.length;i+=4){
-      // simple contrast boost
-      d[i] = clamp((d[i]-128)*1.2 + 128 + 20);     // r
-      d[i+1] = clamp((d[i+1]-128)*1.1 + 128 - 10); // g
-      d[i+2] = clamp((d[i+2]-128)*1.3 + 128 + 40); // b
+      d[i] = clamp((d[i]-128)*1.3+128+20);
+      d[i+1] = clamp((d[i+1]-128)*1.1+128-10);
+      d[i+2] = clamp((d[i+2]-128)*1.4+128+40);
     }
     ctx.putImageData(img,0,0);
-    // soft neon overlay
-    ctx.fillStyle = "rgba(255,75,154,0.06)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-  } else if(filter === "vintage"){
-    const img = ctx.getImageData(0,0,canvas.width,canvas.height);
-    const d = img.data;
+  }else if(filter === "vintage"){
     for(let i=0;i<d.length;i+=4){
-      const r = d[i], g = d[i+1], b = d[i+2];
-      // sepia-ish
-      d[i]   = clamp((r*0.393)+(g*0.769)+(b*0.189));
-      d[i+1] = clamp((r*0.349)+(g*0.686)+(b*0.168));
-      d[i+2] = clamp((r*0.272)+(g*0.534)+(b*0.131));
-      // slight desaturate
-      const avg = (d[i]+d[i+1]+d[i+2])/3;
-      d[i] = d[i]*0.95 + avg*0.05;
-      d[i+1] = d[i+1]*0.95 + avg*0.05;
-      d[i+2] = d[i+2]*0.95 + avg*0.05;
+      const r=d[i],g=d[i+1],b=d[i+2];
+      d[i]   = clamp(r*0.393+g*0.769+b*0.189);
+      d[i+1] = clamp(r*0.349+g*0.686+b*0.168);
+      d[i+2] = clamp(r*0.272+g*0.534+b*0.131);
     }
     ctx.putImageData(img,0,0);
-    // vignette
-    const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, Math.min(canvas.width,canvas.height)/4, canvas.width/2, canvas.height/2, Math.max(canvas.width,canvas.height));
-    g.addColorStop(0, "rgba(0,0,0,0)");
-    g.addColorStop(1, "rgba(0,0,0,0.35)");
-    ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
-  } else if(filter === "bw"){
-    const img = ctx.getImageData(0,0,canvas.width,canvas.height);
-    const d = img.data;
+  }else if(filter === "bw"){
     for(let i=0;i<d.length;i+=4){
       const avg = (d[i]+d[i+1]+d[i+2])/3;
       d[i]=d[i+1]=d[i+2]=avg;
     }
     ctx.putImageData(img,0,0);
-  } else if(filter === "grain"){
-    // subtle film grain + contrast
-    const img = ctx.getImageData(0,0,canvas.width,canvas.height);
-    const d = img.data;
+  }else if(filter === "film"){
     for(let i=0;i<d.length;i+=4){
-      const noise = (Math.random()-0.5)*30;
+      const noise = (Math.random()-0.5)*25;
       d[i] = clamp(d[i]+noise);
       d[i+1] = clamp(d[i+1]+noise);
       d[i+2] = clamp(d[i+2]+noise);
     }
     ctx.putImageData(img,0,0);
-    ctx.fillStyle = "rgba(255,200,150,0.02)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-  } else if(filter === "edge"){
-    // simple edge detection convolution
-    const img = ctx.getImageData(0,0,canvas.width,canvas.height);
-    const out = ctx.createImageData(img.width, img.height);
+  }else if(filter === "edge"){
+    const out = ctx.createImageData(img.width,img.height);
     const w = img.width, h = img.height;
-    const d = img.data, od = out.data;
-    const kernel = [ -1,-1,-1, -1,8,-1, -1,-1,-1 ];
+    const od = out.data;
+    const kernel = [-1,-1,-1,-1,8,-1,-1,-1,-1];
     for(let y=1;y<h-1;y++){
       for(let x=1;x<w-1;x++){
-        let r=0,g=0,b=0;
-        let k=0;
+        let r=0,g=0,b=0,k=0;
         for(let ky=-1;ky<=1;ky++){
           for(let kx=-1;kx<=1;kx++){
-            const px = ( (y+ky)*w + (x+kx) )*4;
+            const px = ((y+ky)*w + (x+kx))*4;
             r += d[px]*kernel[k];
             g += d[px+1]*kernel[k];
             b += d[px+2]*kernel[k];
             k++;
           }
         }
-        const idx = (y*w + x)*4;
-        od[idx] = clamp(Math.abs(r));
-        od[idx+1] = clamp(Math.abs(g));
-        od[idx+2] = clamp(Math.abs(b));
-        od[idx+3] = 255;
+        const idx = (y*w+x)*4;
+        od[idx]=clamp(Math.abs(r));
+        od[idx+1]=clamp(Math.abs(g));
+        od[idx+2]=clamp(Math.abs(b));
+        od[idx+3]=255;
       }
     }
     ctx.putImageData(out,0,0);
   }
 }
 
-function clamp(v){ return Math.max(0, Math.min(255, Math.round(v))); }
+function clamp(v){ return Math.max(0,Math.min(255,Math.round(v))); }
 
-// ---------- Filter UI ----------
-$$(".filter-btn").forEach(b => b.addEventListener("click", e => {
-  $$(".filter-btn").forEach(x=>x.classList.remove("active"));
-  b.classList.add("active");
-  currentFilter = b.dataset.filter;
-  $("#filter-label").textContent = b.textContent;
-}));
-
-// ---------- Snap to chat (capture canvas image) ----------
-$("#btn-snap").addEventListener("click", () => {
-  if(!state.currentUser) { alert("Login first"); return; }
-  // ensure canvas has latest frame
-  const data = canvas.toDataURL("image/png");
-  // increment streak
-  state.snapStreaks[state.currentUser] = (state.snapStreaks[state.currentUser]||0) + 1;
-  // push message into current channel
-  const srv = state.servers[state.currentServer];
-  if(!srv) return;
-  const key = `${srv.id}::${state.currentChannel}`;
-  state.messages[key] = state.messages[key] || [];
-  state.messages[key].push({ id:"m"+Date.now(), from:state.currentUser, text:"[Snap]", image:data, ts:Date.now() });
-  save(); renderChat(); renderHeaderStats(); renderUsers(); notifyIncoming();
+$$(".filter-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    $$(".filter-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    currentFilter = btn.dataset.filter;
+    $("#filter-name").textContent = btn.textContent;
+  });
 });
 
-// ---------- TikTok feed ----------
-function renderTikTok(){
-  const feed = $("#tiktok-feed");
-  feed.innerHTML = "";
-  const items = window.__tiktok || [];
-  items.forEach(it => {
-    const card = document.createElement("div"); card.className="tiktok-card";
-    const v = document.createElement("video"); v.src = it.src; v.controls = true; v.loop = true;
-    card.appendChild(v);
-    const meta = document.createElement("div"); meta.style.padding="8px"; meta.innerHTML = `<strong>${it.title}</strong><div style="font-size:12px;color:var(--muted)">@${it.creator} • ♥ ${it.stats.likes}</div>`;
-    card.appendChild(meta);
-    feed.appendChild(card);
+// ---------- SNAP ACTIONS ----------
+$("#btn-snap-chat").addEventListener("click", ()=>{
+  const me = state.currentUser;
+  if(!me){ alert("Login first"); return; }
+  if(!currentChatTarget){ alert("Open a chat first"); return; }
+  const data = canvas.toDataURL("image/png");
+  const key = chatKey(me,currentChatTarget);
+  if(!state.chats[key]) state.chats[key] = { messages:[] };
+  state.chats[key].messages.push({
+    from: me,
+    text: "[Snap]",
+    image: data,
+    ts: Date.now()
+  });
+  saveState();
+  renderChatsList();
+  renderChatView(currentChatTarget);
+  notify();
+});
+
+$("#btn-snap-story").addEventListener("click", ()=>{
+  const me = state.currentUser;
+  if(!me){ alert("Login first"); return; }
+  const data = canvas.toDataURL("image/png");
+  state.stories[me] = { image:data, ts:Date.now() };
+  saveState();
+  renderStories();
+  renderProfile();
+  alert("Added to your story");
+});
+
+$("#btn-snap-gallery").addEventListener("click", ()=>{
+  const me = state.currentUser;
+  if(!me){ alert("Login first"); return; }
+  const user = state.users[me];
+  const data = canvas.toDataURL("image/png");
+  user.gallery = user.gallery || [];
+  user.gallery.push({ image:data, ts:Date.now() });
+  saveState();
+  renderProfile();
+  alert("Saved to gallery");
+});
+
+// ---------- STORIES ----------
+function renderStories(){
+  const list = $("#story-list");
+  list.innerHTML = "";
+  const entries = Object.entries(state.stories);
+  if(entries.length === 0){
+    list.innerHTML = "<div class='muted'>No stories yet.</div>";
+    return;
+  }
+  entries.forEach(([username,story])=>{
+    const user = state.users[username];
+    if(!user) return;
+    const item = document.createElement("div");
+    item.className = "story-item";
+    const thumb = document.createElement("div");
+    thumb.className = "story-thumb";
+    const img = document.createElement("img");
+    img.src = story.image;
+    thumb.appendChild(img);
+    const name = document.createElement("div");
+    name.className = "story-name";
+    name.textContent = user.displayName || user.username;
+    item.appendChild(thumb);
+    item.appendChild(name);
+    item.addEventListener("click", ()=>{
+      viewStory(username);
+    });
+    list.appendChild(item);
   });
 }
 
-// ---------- Utilities ----------
-function escapeHtml(s){ return String(s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function viewStory(username){
+  const story = state.stories[username];
+  const user = state.users[username];
+  if(!story || !user) return;
+  const container = document.createElement("div");
+  container.style.position = "fixed";
+  container.style.inset = "0";
+  container.style.background = "rgba(0,0,0,0.7)";
+  container.style.display = "flex";
+  container.style.alignItems = "center";
+  container.style.justifyContent = "center";
+  container.style.zIndex = "9999";
 
-// ---------- Simple demo: create friend request (for testing) ----------
-window.createFriendRequest = (from,to) => {
-  state.friendRequests.push({ from, to, ts:Date.now() });
-  save();
-  renderRequests();
-};
+  const card = document.createElement("div");
+  card.style.background = "#000";
+  card.style.borderRadius = "20px";
+  card.style.padding = "10px";
+  card.style.maxWidth = "420px";
+  card.style.width = "90%";
+  card.style.boxShadow = "0 18px 40px rgba(0,0,0,0.6)";
+  const img = document.createElement("img");
+  img.src = story.image;
+  img.style.width = "100%";
+  img.style.borderRadius = "16px";
+  const caption = document.createElement("div");
+  caption.style.color = "#fff";
+  caption.style.fontSize = "13px";
+  caption.style.marginTop = "6px";
+  caption.textContent = (user.displayName||user.username) + "'s story";
+  card.appendChild(img);
+  card.appendChild(caption);
+  container.appendChild(card);
+  container.addEventListener("click", ()=>document.body.removeChild(container));
+  document.body.appendChild(container);
+}
 
-// ---------- Small UX helpers ----------
-$("#btn-profile").addEventListener("click", () => {
-  const u = state.currentUser && state.users[state.currentUser];
-  if(!u) return alert("No profile");
-  alert(`Profile\n\nUsername: ${u.username}\nDisplay: ${u.displayName}\nBio: ${u.bio||''}\nFriends: ${u.friends?.length||0}\nStreak: ${state.snapStreaks[u.username]||0}`);
+// ---------- PROFILE ----------
+function renderProfile(){
+  const me = state.currentUser;
+  if(!me) return;
+  const user = state.users[me];
+  $("#profile-name").textContent = user.displayName || user.username;
+  $("#profile-username").textContent = "@"+user.username;
+  $("#profile-bio").textContent = user.bio || "No bio yet.";
+  $("#profile-status-text").textContent = user.status || "";
+
+  const avatar = $("#profile-avatar");
+  avatar.innerHTML = "";
+  if(user.avatar){
+    const img = document.createElement("img");
+    img.src = user.avatar;
+    avatar.appendChild(img);
+  }else{
+    avatar.textContent = (user.displayName||user.username)[0].toUpperCase();
+  }
+
+  const ring = $("#profile-story-ring");
+  if(state.stories[me]) ring.classList.remove("hidden");
+  else ring.classList.add("hidden");
+
+  const storyBox = $("#profile-story");
+  const story = state.stories[me];
+  storyBox.innerHTML = "";
+  if(!story){
+    storyBox.classList.add("empty");
+    storyBox.textContent = "No active story";
+  }else{
+    storyBox.classList.remove("empty");
+    const img = document.createElement("img");
+    img.src = story.image;
+    storyBox.appendChild(img);
+  }
+
+  const grid = $("#gallery-grid");
+  grid.innerHTML = "";
+  (user.gallery || []).slice().reverse().forEach(item=>{
+    const img = document.createElement("img");
+    img.src = item.image;
+    grid.appendChild(img);
+  });
+}
+
+// avatar upload
+$("#avatar-input").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    const me = state.currentUser;
+    if(!me) return;
+    state.users[me].avatar = ev.target.result;
+    saveState();
+    renderProfile();
+    renderChatsList();
+    renderChatView(currentChatTarget);
+  };
+  reader.readAsDataURL(file);
+});
+
+// status
+$("#btn-set-status").addEventListener("click", ()=>{
+  const me = state.currentUser;
+  if(!me) return;
+  const val = prompt("Set your status:", state.users[me].status || "");
+  if(val === null) return;
+  state.users[me].status = val.trim();
+  saveState();
+  renderProfile();
+  renderChatsList();
+  renderChatView(currentChatTarget);
 });
