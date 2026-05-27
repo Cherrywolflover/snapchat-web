@@ -4,307 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClassChat Pro</title>
-    <style>
-        :root {
-            --bg-dark: #0f111a;
-            --panel-bg: #1e2235;
-            --accent: #ff4757;
-            --accent-glow: rgba(255, 71, 87, 0.3);
-            --text-main: #ffffff;
-            --text-muted: #8b92b5;
-            --online: #2ed573;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        /* Screen Management */
-        .screen {
-            display: none;
-            width: 100%;
-            height: 100%;
-            max-width: 450px;
-            background: var(--panel-bg);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .screen.active {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Auth Flow CSS */
-        .auth-container {
-            padding: 40px 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 100%;
-        }
-
-        h2 {
-            margin-bottom: 24px;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        input[type="text"], input[type="email"] {
-            width: 100%;
-            padding: 14px;
-            background: #131622;
-            border: 2px solid transparent;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background: var(--accent);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background: #ff6b81;
-        }
-
-        /* Main Dashboard Layout */
-        .app-header {
-            padding: 16px;
-            background: #131622;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #2d324d;
-        }
-
-        .tabs {
-            display: flex;
-            background: #131622;
-            padding: 5px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            color: var(--text-muted);
-            font-weight: 600;
-            border-radius: 8px;
-        }
-
-        .tab.active {
-            background: var(--panel-bg);
-            color: var(--accent);
-        }
-
-        .tab-content {
-            display: none;
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Component Styles */
-        .item-card {
-            background: #131622;
-            padding: 14px;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            background: #2d324d;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .streak-badge {
-            color: #ffa502;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .action-btn {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            width: auto;
-            margin: 0;
-        }
-
-        /* Chat Engine UI */
-        .chat-view {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .msg {
-            max-width: 75%;
-            padding: 12px;
-            border-radius: 14px;
-            line-height: 1.4;
-            font-size: 15px;
-        }
-
-        .msg.sent {
-            background: var(--accent);
-            align-self: flex-end;
-            border-bottom-right-radius: 2px;
-        }
-
-        .msg.received {
-            background: #2d324d;
-            align-self: flex-start;
-            border-bottom-left-radius: 2px;
-        }
-
-        .msg img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 6px;
-            display: block;
-        }
-
-        .chat-input-area {
-            padding: 16px;
-            background: #131622;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 22px;
-            cursor: pointer;
-            padding: 5px;
-            width: auto;
-            margin: 0;
-        }
-
-        .icon-btn:hover {
-            color: white;
-            background: none;
-        }
-
-        /* Camera Modal */
-        .camera-modal {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-        }
-
-        #camera-stream {
-            width: 100%;
-            flex: 1;
-            object-fit: cover;
-        }
-
-        .filter-bar {
-            display: flex;
-            gap: 10px;
-            padding: 10px;
-            overflow-x: auto;
-            background: rgba(0,0,0,0.5);
-        }
-
-        .filter-thumb {
-            padding: 6px 12px;
-            background: #222;
-            border-radius: 20px;
-            font-size: 12px;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-
-        /* Filters Implementation */
-        .filter-normal { filter: none; }
-        .filter-vintage { filter: sepia(0.8) contrast(1.2); }
-        .filter-neon { filter: hue-rotate(90deg) saturate(2); }
-        .filter-bw { filter: grayscale(1); }
-    </style>
+    <!-- THIS IS THE LINE THAT LINK TO YOUR CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -363,11 +64,68 @@
 
         <!-- Chats Tab -->
         <div id="tab-chats" class="tab-content active">
-            <div id="active-chats-list">
-                <!-- Injected via JS -->
-            </div>
+            <div id="active-chats-list"></div>
         </div>
 
         <!-- Servers Tab -->
         <div id="tab-servers" class="tab-content">
             <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="new-server-name" placeholder="Server name..." style="padding: 10px;">
+                <button class="action-btn" onclick="createServer()">+ Create</button>
+            </div>
+            <div id="servers-list"></div>
+        </div>
+
+        <!-- Friends Tab -->
+        <div id="tab-friends" class="tab-content">
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="search-friend-username" placeholder="Type classmate's username...">
+                <button class="action-btn" onclick="sendFriendRequest()">Add</button>
+            </div>
+            
+            <h4 style="margin-bottom: 10px; color: var(--text-muted)">Pending Requests</h4>
+            <div id="pending-requests-list" style="margin-bottom: 20px;"></div>
+            
+            <h4 style="margin-bottom: 10px; color: var(--text-muted)">All Friends</h4>
+            <div id="friends-list"></div>
+        </div>
+    </div>
+
+    <!-- SCREEN 5: Dedicated Chat View -->
+    <div id="screen-chat-view" class="screen">
+        <div class="app-header">
+            <button class="icon-btn" onclick="backToMain()">←</button>
+            <h3 id="chat-title">Chat</h3>
+            <div id="chat-streak-status" class="streak-badge"></div>
+        </div>
+        
+        <div class="chat-view">
+            <div class="chat-messages" id="chat-messages-container"></div>
+            
+            <div class="chat-input-area">
+                <button class="icon-btn" onclick="openCamera()">📷</button>
+                <input type="text" id="chat-inline-input" placeholder="Send a message..." style="flex: 1;">
+                <button class="icon-btn" onclick="sendTextMessage()">➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAMERA MODAL COMPONENT -->
+    <div id="camera-modal" class="camera-modal">
+        <video id="camera-stream" autoplay playsinline></video>
+        <div class="filter-bar">
+            <div class="filter-thumb" onclick="applyFilter('filter-normal')">Normal</div>
+            <div class="filter-thumb" onclick="applyFilter('filter-vintage')">Vintage</div>
+            <div class="filter-thumb" onclick="applyFilter('filter-neon')">Neon</div>
+            <div class="filter-thumb" onclick="applyFilter('filter-bw')">B&W</div>
+        </div>
+        <div style="padding: 20px; display: flex; justify-content: space-around; background: #000;">
+            <button class="action-btn" onclick="closeCamera()" style="background: #333;">Cancel</button>
+            <button class="action-btn" onclick="captureAndSendPhoto()" style="background: var(--online);">Snap & Send</button>
+        </div>
+    </div>
+
+    <!-- THIS IS THE LINE THAT LINKS TO YOUR FIRST + SECOND HALF JAVASCRIPT -->
+    <script src="script.js"></script>
+</body>
+</html>
