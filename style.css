@@ -1,4 +1,4 @@
-/* ====== DISCORD MASTER DESIGN SYSTEM ====== */
+/* ====== DISCORD DESKTOP LAYOUT SYSTEM ====== */
 :root {
     --discord-bg-servers: #1e1f22;
     --discord-bg-channels: #2b2d31;
@@ -8,7 +8,8 @@
     --discord-text-white: #f2f3f5;
     --discord-text-muted: #949ba4;
     --discord-online: #23a55a;
-    --discord-card: #383a40;
+    --discord-card: #35373c;
+    --discord-input: #383a40;
 }
 
 * {
@@ -19,196 +20,147 @@
 }
 
 body {
-    background-color: #111214;
+    background-color: var(--discord-bg-servers);
     color: var(--discord-text-white);
     height: 100vh;
+    width: 100vw;
+    display: flex;
+    overflow: hidden;
+}
+
+/* Authentication Screen Overlays Entire Window */
+.screen-auth {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #111214;
+    z-index: 999;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
 }
 
-/* App Container Layout Like Desktop Discord */
-.screen {
-    display: none;
-    width: 100%;
-    height: 100%;
-    max-width: 450px;
-    background: var(--discord-bg-chat);
-    border-radius: 8px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
-    position: relative;
-    overflow: hidden;
+.screen-auth.hidden {
+    display: none !important;
 }
 
-.screen.active {
-    display: flex;
-    flex-direction: column;
-}
-
-/* Registration Styling */
 .auth-container {
-    padding: 32px;
+    background: var(--discord-bg-channels);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    width: 100%;
+    max-width: 480px;
+}
+
+h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+p { color: var(--discord-text-muted); font-size: 14px; text-align: center; margin-bottom: 24px; }
+.input-group { margin-bottom: 16px; }
+label { display: block; margin-bottom: 8px; color: var(--discord-text-muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+input[type="text"] { width: 100%; padding: 12px; background: var(--discord-bg-servers); border: none; border-radius: 4px; color: white; font-size: 16px; }
+button { width: 100%; padding: 12px; background: var(--discord-blurple); border: none; border-radius: 4px; color: white; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+button:hover { background: var(--discord-blurple-hover); }
+
+/* --- THREE COLUMN DESKTOP GRID --- */
+.desktop-wrapper {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* COLUMN 1: Leftmost Icon Strip */
+.sidebar-servers {
+    width: 72px;
+    background: var(--discord-bg-servers);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    height: 100%;
-    background: var(--discord-bg-channels);
-}
-
-h2 {
-    color: var(--discord-text-white);
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    text-align: center;
-}
-
-p {
-    color: var(--discord-text-muted);
-    font-size: 14px;
-    text-align: center;
-    margin-bottom: 24px;
-}
-
-.input-group {
-    margin-bottom: 16px;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--discord-text-muted);
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    background: #1e1f22;
-    border: none;
-    border-radius: 4px;
-    color: var(--discord-text-white);
-    font-size: 16px;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    background: var(--discord-blurple);
-    border: none;
-    border-radius: 4px;
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-button:hover {
-    background: var(--discord-blurple-hover);
-}
-
-/* Main Navigation Header */
-.app-header {
-    padding: 12px 16px;
-    background: var(--discord-bg-channels);
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    padding-top: 12px;
+    gap: 8px;
 }
 
-.tabs {
-    display: flex;
-    background: var(--discord-bg-servers);
-    padding: 6px;
-    gap: 4px;
-}
-
-.tab {
-    flex: 1;
-    padding: 8px;
-    text-align: center;
-    cursor: pointer;
-    color: var(--discord-text-muted);
-    font-weight: 600;
-    font-size: 14px;
-    border-radius: 4px;
-}
-
-.tab.active {
-    background: var(--discord-card);
-    color: var(--discord-text-white);
-}
-
-.tab-content {
-    display: none;
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-/* Discord List Cards & Adding Logic */
-.item-card {
+.server-icon {
+    width: 48px;
+    height: 48px;
     background: var(--discord-bg-channels);
-    padding: 12px;
-    border-radius: 4px;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-left: 4px solid transparent;
-}
-
-.item-card:hover {
-    background: var(--discord-card);
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.avatar {
-    width: 36px;
-    height: 36px;
-    background: var(--discord-blurple);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.2s;
 }
 
-.streak-badge {
-    color: #f4b81c;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-.action-btn {
-    padding: 6px 12px;
-    border-radius: 3px;
-    font-size: 13px;
-    width: auto;
-    margin: 0;
+.server-icon:hover, .server-icon.active {
+    border-radius: 16px;
     background: var(--discord-blurple);
 }
 
-/* Chat Log View (Cleaner White Text Look) */
-.chat-view {
+/* COLUMN 2: Middle Lists Sidebar */
+.sidebar-lists {
+    width: 240px;
+    background: var(--discord-bg-channels);
     display: flex;
     flex-direction: column;
-    height: 100%;
+}
+
+.sidebar-header {
+    height: 48px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #1f2023;
+    font-weight: 600;
+}
+
+.list-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.list-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--discord-text-muted);
+    text-transform: uppercase;
+    padding: 8px;
+}
+
+/* Sidebar List Row Buttons */
+.list-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 2px;
+}
+
+.list-row:hover { background: var(--discord-card); }
+.list-row.active { background: #404249; color: white; }
+
+.row-left { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.row-avatar { width: 32px; height: 32px; background: var(--discord-blurple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
+
+/* COLUMN 3: Right Main Chat/Content Panel */
+.main-chat-panel {
+    flex: 1;
+    background: var(--discord-bg-chat);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    height: 48px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #26272b;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .chat-messages {
@@ -220,99 +172,27 @@ button:hover {
     gap: 16px;
 }
 
-.msg {
+.msg { display: flex; flex-direction: column; font-size: 15px; color: #dbdee1; }
+.msg strong { color: var(--discord-text-white); font-size: 14px; margin-bottom: 2px; }
+.msg img { max-width: 300px; border-radius: 8px; margin-top: 6px; }
+
+.chat-input-area { padding: 0 16px 24px 16px; }
+.chat-input-wrapper { display: flex; background: var(--discord-input); border-radius: 8px; padding: 4px 12px; align-items: center; gap: 12px; }
+.chat-input-wrapper input { background: transparent; border: none; width: 100%; padding: 12px 0; color: white; outline: none; font-size: 15px; }
+
+.icon-btn { background: none; border: none; color: var(--discord-text-muted); font-size: 22px; cursor: pointer; }
+.icon-btn:hover { color: var(--discord-text-white); }
+
+/* Dashboard Actions Layout */
+.dashboard-actions-view {
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    max-width: 100%;
-    font-size: 15px;
-    color: #dbdee1;
-}
-
-.msg strong {
-    color: var(--discord-text-white);
-    margin-bottom: 4px;
-    font-size: 14px;
-}
-
-.msg .msg-body {
-    background: transparent;
-    padding: 0;
-    color: #dbdee1;
-}
-
-.msg img {
-    max-width: 200px;
-    border-radius: 8px;
-    margin-top: 6px;
-}
-
-.chat-input-area {
-    padding: 16px;
-    background: var(--discord-bg-chat);
-}
-
-.chat-input-wrapper {
-    display: flex;
-    background: #383a40;
-    border-radius: 8px;
-    padding: 4px 12px;
-    align-items: center;
-    gap: 10px;
-}
-
-.chat-input-wrapper input {
-    background: transparent;
-    border: none;
-    width: 100%;
-    padding: 10px 0;
-    color: white;
-    outline: none;
-}
-
-.icon-btn {
-    background: none;
-    border: none;
-    color: var(--discord-text-muted);
-    font-size: 20px;
-    cursor: pointer;
-    width: auto;
-    margin: 0;
-}
-
-.icon-btn:hover {
-    color: var(--discord-text-white);
+    gap: 20px;
 }
 
 /* Modals Overlay */
-.camera-modal {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #000;
-    z-index: 100;
-    display: none;
-    flex-direction: column;
-}
-
-#camera-stream {
-    width: 100%;
-    flex: 1;
-    object-fit: cover;
-}
-
-.filter-bar {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    overflow-x: auto;
-}
-
-.filter-thumb {
-    padding: 6px 12px;
-    background: #2b2d31;
-    border-radius: 4px;
-    font-size: 12px;
-    cursor: pointer;
-}
+.camera-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 1000; display: none; flex-direction: column; }
+#camera-stream { width: 100%; flex: 1; object-fit: cover; }
+.filter-bar { display: flex; gap: 10px; padding: 10px; justify-content: center; }
+.filter-thumb { padding: 6px 12px; background: #2b2d31; border-radius: 4px; font-size: 12px; cursor: pointer; }
