@@ -4,39 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClassChat Pro</title>
-    <!-- THIS IS THE LINE THAT LINK TO YOUR CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- SCREEN 1: Register Email -->
-    <div id="screen-email" class="screen active">
+    <!-- INSTANT ACCESS PROFILE SETUP (Replaces Page 1 and 2) -->
+    <div id="screen-profile" class="screen active">
         <div class="auth-container">
-            <h2>Create Account</h2>
-            <div class="input-group">
-                <label>School Email</label>
-                <input type="email" id="reg-email" placeholder="you@school.com">
-            </div>
-            <button onclick="handleEmailSubmit()">Send Code</button>
-        </div>
-    </div>
-
-    <!-- SCREEN 2: Verification Code -->
-    <div id="screen-code" class="screen">
-        <div class="auth-container">
-            <h2>Enter Code</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">We sent a 4-digit code to your email.</p>
-            <div class="input-group">
-                <input type="text" id="reg-code" placeholder="1234" style="text-align: center; letter-spacing: 8px;">
-            </div>
-            <button onclick="handleCodeSubmit()">Verify Code</button>
-        </div>
-    </div>
-
-    <!-- SCREEN 3: Profile Setup -->
-    <div id="screen-profile" class="screen">
-        <div class="auth-container">
-            <h2>Set Username</h2>
+            <h2>Welcome to ClassChat</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Skip the email. Pick a username to start chatting instantly!</p>
             <div class="input-group">
                 <label>Your Name</label>
                 <input type="text" id="reg-name" placeholder="John Doe">
@@ -49,7 +25,7 @@
         </div>
     </div>
 
-    <!-- SCREEN 4: Main Dashboard -->
+    <!-- MAIN DASHBOARD -->
     <div id="screen-main" class="screen">
         <div class="app-header">
             <h3 id="display-username">@username</h3>
@@ -62,12 +38,10 @@
             <div class="tab" onclick="switchTab('friends')">Friends</div>
         </div>
 
-        <!-- Chats Tab -->
         <div id="tab-chats" class="tab-content active">
             <div id="active-chats-list"></div>
         </div>
 
-        <!-- Servers Tab -->
         <div id="tab-servers" class="tab-content">
             <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                 <input type="text" id="new-server-name" placeholder="Server name..." style="padding: 10px;">
@@ -76,7 +50,6 @@
             <div id="servers-list"></div>
         </div>
 
-        <!-- Friends Tab -->
         <div id="tab-friends" class="tab-content">
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <input type="text" id="search-friend-username" placeholder="Type classmate's username...">
@@ -91,7 +64,7 @@
         </div>
     </div>
 
-    <!-- SCREEN 5: Dedicated Chat View -->
+    <!-- DEDICATED CHAT VIEW -->
     <div id="screen-chat-view" class="screen">
         <div class="app-header">
             <button class="icon-btn" onclick="backToMain()">←</button>
@@ -110,7 +83,7 @@
         </div>
     </div>
 
-    <!-- CAMERA MODAL COMPONENT -->
+    <!-- CAMERA OBERLAY -->
     <div id="camera-modal" class="camera-modal">
         <video id="camera-stream" autoplay playsinline></video>
         <div class="filter-bar">
@@ -125,7 +98,6 @@
         </div>
     </div>
 
-    <!-- THIS IS THE LINE THAT LINKS TO YOUR FIRST + SECOND HALF JAVASCRIPT -->
     <script src="script.js"></script>
 </body>
 </html>
