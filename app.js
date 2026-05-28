@@ -697,3 +697,5 @@ function updateStreak(chatId) {
   saveState();
 }
 
+// ============== START ==============
+init();
